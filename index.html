@@ -3,74 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Waste Management Dashboard</title>
+    <title>Waste Analysis Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 font-sans text-slate-800">
 
     <div class="max-w-7xl mx-auto p-6">
-        <!-- Header -->
         <header class="mb-8">
-            <h1 class="text-3xl font-bold text-slate-900">ภาพรวมการจัดการขยะ</h1>
-            <p class="text-slate-500">ข้อมูลอัปเดตล่าสุด: 13 มิ.ย. 2026</p>
+            <h1 class="text-3xl font-bold text-slate-900">วิเคราะห์ข้อมูล Waste</h1>
         </header>
 
-        <!-- KPI Summary Cards (ตามตัวอย่างภาพ) -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <!-- Card 1 -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-slate-500 font-medium uppercase">ขยะรวม</p>
-                    <h3 class="text-2xl font-bold text-slate-900 mt-1">1,250 <span class="text-sm font-normal text-slate-400">kg</span></h3>
-                </div>
-                <div class="bg-blue-50 p-3 rounded-full text-blue-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                </div>
-            </div>
-            <!-- Card 2 -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-slate-500 font-medium uppercase">รีไซเคิล</p>
-                    <h3 class="text-2xl font-bold text-emerald-600 mt-1">850 <span class="text-sm font-normal text-slate-400">kg</span></h3>
-                </div>
-                <div class="bg-emerald-50 p-3 rounded-full text-emerald-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                </div>
-            </div>
-            <!-- Card 3 -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-slate-500 font-medium uppercase">ขยะทั่วไป</p>
-                    <h3 class="text-2xl font-bold text-rose-600 mt-1">400 <span class="text-sm font-normal text-slate-400">kg</span></h3>
-                </div>
-                <div class="bg-rose-50 p-3 rounded-full text-rose-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                </div>
-            </div>
-            <!-- Card 4 -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-slate-500 font-medium uppercase">อื่นๆ</p>
-                    <h3 class="text-2xl font-bold text-amber-600 mt-1">0 <span class="text-sm font-normal text-slate-400">kg</span></h3>
-                </div>
-                <div class="bg-amber-50 p-3 rounded-full text-amber-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path></svg>
-                </div>
+        <!-- ตัวกรองข้อมูล (Filter) -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-8 flex gap-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-600 mb-1">เลือกเครื่องจักร (คอลัมน์ G)</label>
+                <select id="machineFilter" class="border rounded-lg p-2 w-48" onchange="renderTable()">
+                    <option value="ทั้งหมด">ทั้งหมด</option>
+                    <option value="Machine A">Machine A</option>
+                    <option value="Machine B">Machine B</option>
+                </select>
             </div>
         </div>
 
-        <!-- Table -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-            <div class="p-6 border-b border-slate-100">
-                <h3 class="text-lg font-bold text-slate-900">รายการขยะล่าสุด</h3>
-            </div>
             <table class="w-full text-left">
                 <thead class="bg-slate-50">
                     <tr>
-                        <th class="p-5 text-sm font-semibold text-slate-600">วันที่</th>
-                        <th class="p-5 text-sm font-semibold text-slate-600">ประเภท</th>
-                        <th class="p-5 text-sm font-semibold text-slate-600">ปริมาณ (kg)</th>
-                        <th class="p-5 text-sm font-semibold text-slate-600">สถานะ</th>
+                        <th class="p-5 text-sm font-semibold text-slate-600">ประเภทแกรม (จากคอลัมน์ E)</th>
+                        <th class="p-5 text-sm font-semibold text-slate-600">ปัญหาที่พบ (คอลัมน์ U)</th>
+                        <th class="p-5 text-sm font-semibold text-slate-600">น้ำหนัก (คอลัมน์ Y)</th>
                     </tr>
                 </thead>
                 <tbody id="wasteTableBody" class="divide-y divide-slate-100"></tbody>
@@ -79,34 +40,36 @@
     </div>
 
     <script>
-        const wasteData = [
-            { date: '2026-06-10', type: 'พลาสติก', amount: 120, status: 'จัดเก็บแล้ว' },
-            { date: '2026-06-11', type: 'กระดาษ', amount: 300, status: 'รอการจัดการ' },
-            { date: '2026-06-12', type: 'เศษอาหาร', amount: 80, status: 'จัดเก็บแล้ว' },
-            { date: '2026-06-13', type: 'โลหะ', amount: 45, status: 'กำลังดำเนินการ' }
+        // ข้อมูลจำลองตามโครงสร้างที่คุณต้องการ
+        const rawData = [
+            { machine: 'Machine A', code: 'CA105', problem: 'รอยยับ', weight: 50 },
+            { machine: 'Machine B', code: 'CA125', problem: 'ขาดกลาง', weight: 120 },
+            { machine: 'Machine A', code: 'CA105', problem: 'รอยเปื้อน', weight: 30 }
         ];
 
-        const tbody = document.getElementById('wasteTableBody');
-        wasteData.forEach(item => {
-            const statusStyle = {
-                'จัดเก็บแล้ว': 'bg-emerald-50 text-emerald-700',
-                'กำลังดำเนินการ': 'bg-blue-50 text-blue-700',
-                'รอการจัดการ': 'bg-amber-50 text-amber-700'
-            }[item.status] || 'bg-slate-100 text-slate-600';
+        function renderTable() {
+            const machine = document.getElementById('machineFilter').value;
+            const tbody = document.getElementById('wasteTableBody');
+            tbody.innerHTML = '';
 
-            tbody.innerHTML += `
-                <tr class="hover:bg-slate-50/50 transition">
-                    <td class="p-5 text-slate-600">${item.date}</td>
-                    <td class="p-5 font-medium">${item.type}</td>
-                    <td class="p-5 font-bold text-slate-900">${item.amount}</td>
-                    <td class="p-5">
-                        <span class="px-3 py-1 rounded-lg text-xs font-semibold ${statusStyle}">
-                            ${item.status}
-                        </span>
-                    </td>
-                </tr>
-            `;
-        });
+            const filtered = machine === 'ทั้งหมด' ? rawData : rawData.filter(d => d.machine === machine);
+
+            filtered.forEach(item => {
+                // แปลงรหัสคอลัมน์ E ตามเงื่อนไข
+                const gramType = item.code === 'CA105' ? 'แกรมบาง' : (item.code === 'CA125' ? 'แกรมหนา' : item.code);
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-5 font-medium">${gramType}</td>
+                        <td class="p-5">${item.problem}</td>
+                        <td class="p-5 font-bold">${item.weight} kg</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // เริ่มต้นแสดงผล
+        renderTable();
     </script>
 </body>
 </html>
