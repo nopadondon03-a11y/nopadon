@@ -10,7 +10,7 @@
 
     <div class="max-w-7xl mx-auto p-6">
         <header class="mb-8">
-            <h1 class="text-3xl font-bold text-slate-900">วิเคราะห์ข้อมูล Waste</h1>
+            <h1 class="text-3xl font-bold text-slate-900">วิเคราะห์ข้อมูล Waste จากไฟล์ NCP</h1>
         </header>
 
         <!-- ตัวกรองข้อมูล (Filter) -->
@@ -29,7 +29,7 @@
             <table class="w-full text-left">
                 <thead class="bg-slate-50">
                     <tr>
-                        <th class="p-5 text-sm font-semibold text-slate-600">ประเภทแกรม (จากคอลัมน์ E)</th>
+                        <th class="p-5 text-sm font-semibold text-slate-600">ประเภทแกรม (คอลัมน์ E)</th>
                         <th class="p-5 text-sm font-semibold text-slate-600">ปัญหาที่พบ (คอลัมน์ U)</th>
                         <th class="p-5 text-sm font-semibold text-slate-600">น้ำหนัก (คอลัมน์ Y)</th>
                     </tr>
@@ -40,11 +40,11 @@
     </div>
 
     <script>
-        // ข้อมูลจำลองตามโครงสร้างที่คุณต้องการ
+        // ข้อมูลตัวอย่างที่ปรับตามโครงสร้างที่คุณต้องการ
         const rawData = [
-            { machine: 'Machine A', code: 'CA105', problem: 'รอยยับ', weight: 50 },
-            { machine: 'Machine B', code: 'CA125', problem: 'ขาดกลาง', weight: 120 },
-            { machine: 'Machine A', code: 'CA105', problem: 'รอยเปื้อน', weight: 30 }
+            { machine: 'Machine A', colE: 'CA105', problemColU: 'รอยยับ', weightColY: 50 },
+            { machine: 'Machine B', colE: 'CA125', problemColU: 'ขาดกลาง', weightColY: 120 },
+            { machine: 'Machine A', colE: 'CA105', problemColU: 'รอยเปื้อน', weightColY: 30 }
         ];
 
         function renderTable() {
@@ -55,14 +55,16 @@
             const filtered = machine === 'ทั้งหมด' ? rawData : rawData.filter(d => d.machine === machine);
 
             filtered.forEach(item => {
-                // แปลงรหัสคอลัมน์ E ตามเงื่อนไข
-                const gramType = item.code === 'CA105' ? 'แกรมบาง' : (item.code === 'CA125' ? 'แกรมหนา' : item.code);
+                // แปลงประเภทแกรมตามเงื่อนไข (CA105 = แกรมบาง, CA125 = แกรมหนา)
+                let gramType = item.colE;
+                if (item.colE === 'CA105') gramType = 'แกรมบาง';
+                else if (item.colE === 'CA125') gramType = 'แกรมหนา';
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50 transition">
                         <td class="p-5 font-medium">${gramType}</td>
-                        <td class="p-5">${item.problem}</td>
-                        <td class="p-5 font-bold">${item.weight} kg</td>
+                        <td class="p-5">${item.problemColU}</td>
+                        <td class="p-5 font-bold">${item.weightColY} kg</td>
                     </tr>
                 `;
             });
