@@ -5,68 +5,63 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Waste Dashboard Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
-<body class="bg-gray-50 min-h-screen p-4 md:p-8">
+<body class="bg-slate-50 min-h-screen p-4 md:p-8">
     <div class="max-w-7xl mx-auto">
         <header class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">Dashboard วิเคราะห์ Waste</h1>
-            <div id="status" class="text-blue-600 mt-2">กำลังโหลดข้อมูล...</div>
+            <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">Dashboard วิเคราะห์ Waste</h1>
+            <p class="text-slate-500 mt-2">สรุปข้อมูลการผลิตและของเสียรายประเภท</p>
+            <div id="status" class="text-blue-600 font-medium mt-2">กำลังโหลดข้อมูล...</div>
         </header>
 
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+            <div><label class="block text-xs font-semibold text-slate-500 uppercase">จากวันที่</label><input type="date" id="filterStartDate" class="mt-1 block w-full border border-slate-200 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"></div>
+            <div><label class="block text-xs font-semibold text-slate-500 uppercase">ถึงวันที่</label><input type="date" id="filterEndDate" class="mt-1 block w-full border border-slate-200 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"></div>
+            <div><label class="block text-xs font-semibold text-slate-500 uppercase">เดือน</label><select id="filterMonth" class="mt-1 block w-full border border-slate-200 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"><option value="all">ทั้งหมด</option></select></div>
+            <div><label class="block text-xs font-semibold text-slate-500 uppercase">เครื่องจักร</label><select id="filterMachine" class="mt-1 block w-full border border-slate-200 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"><option value="all">ทั้งหมด</option></select></div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">จากวันที่</label>
-                <input type="date" id="filterStartDate" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                <label class="block text-xs font-semibold text-slate-500 uppercase">ปัญหา</label>
+                <input list="problemList" id="filterProblem" placeholder="ระบุปัญหา..." class="mt-1 block w-full border border-slate-200 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500">
+                <datalist id="problemList"><option value="ทั้งหมด"></datalist>
             </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700">ถึงวันที่</label>
-                <input type="date" id="filterEndDate" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700">เดือน</label>
-                <select id="filterMonth" class="mt-1 block w-full border border-gray-300 rounded-md p-2"><option value="all">ทั้งหมด</option></select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700">เครื่องจักร</label>
-                <select id="filterMachine" class="mt-1 block w-full border border-gray-300 rounded-md p-2"><option value="all">ทั้งหมด</option></select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700">ปัญหา</label>
-                <select id="filterProblem" class="mt-1 block w-full border border-gray-300 rounded-md p-2"><option value="all">ทั้งหมด</option></select>
-            </div>
-            <div class="flex items-end">
-                <button onclick="applyFilters()" class="w-full bg-blue-600 text-white py-2 rounded-md font-bold hover:bg-blue-700 transition">กรองข้อมูล</button>
-            </div>
+            <div class="flex items-end"><button onclick="applyFilters()" class="w-full bg-blue-600 text-white py-2.5 rounded-lg font-bold hover:bg-blue-700 transition-all shadow-md hover:shadow-lg">กรองข้อมูล</button></div>
         </div>
 
-        <!-- ส่วนกราฟ -->
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8">
-            <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
-                <h2 class="font-bold text-gray-700 text-xl">แนวโน้มน้ำหนักของเสีย (kg)</h2>
-                <div id="chartMode" class="bg-gray-100 p-1 rounded-full flex gap-1 mt-4 md:mt-0 shadow-inner">
-                    <button onclick="setMode('Daily')" id="btnDaily" class="px-6 py-2 rounded-full font-medium transition">Daily</button>
-                    <button onclick="setMode('Weekly')" id="btnWeekly" class="px-6 py-2 rounded-full font-medium transition bg-indigo-600 text-white shadow-md">Weekly</button>
-                    <button onclick="setMode('Monthly')" id="btnMonthly" class="px-6 py-2 rounded-full font-medium transition">Monthly</button>
-                </div>
-            </div>
-            <canvas id="wasteChart" height="80"></canvas>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-slate-900 text-white p-6 rounded-2xl shadow-lg shadow-slate-200"><h2 class="text-xs uppercase tracking-wider opacity-70 font-semibold">จำนวนครั้งทั้งหมด</h2><div id="totalAll" class="text-3xl font-bold mt-2">0</div></div>
+            <div class="bg-blue-600 text-white p-6 rounded-2xl shadow-lg shadow-blue-100"><h2 class="text-xs uppercase tracking-wider opacity-70 font-semibold">แกรมบาง (CM105)</h2><div id="totalThin" class="text-3xl font-bold mt-2">0</div></div>
+            <div class="bg-sky-500 text-white p-6 rounded-2xl shadow-lg shadow-sky-100"><h2 class="text-xs uppercase tracking-wider opacity-70 font-semibold">แกรมหนา (CM125)</h2><div id="totalThick" class="text-3xl font-bold mt-2">0</div></div>
+            <div class="bg-slate-500 text-white p-6 rounded-2xl shadow-lg shadow-slate-100"><h2 class="text-xs uppercase tracking-wider opacity-70 font-semibold">ไม่ได้ระบุประเภท</h2><div id="totalNone" class="text-3xl font-bold mt-2">0</div></div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-indigo-900 text-white p-6 rounded-xl shadow-lg">
-                <h2 class="text-sm opacity-80">น้ำหนักรวมทั้งหมด</h2>
-                <div id="totalAll" class="text-3xl font-bold">0.00 kg</div>
+            <div class="bg-rose-50 border border-rose-100 p-5 rounded-2xl text-center"><h2 class="text-xs font-bold text-rose-600 uppercase tracking-widest">หยุดเครื่อง (บาง)</h2><div id="stopThin" class="text-2xl font-bold text-slate-800 mt-1">0</div></div>
+            <div class="bg-rose-50 border border-rose-100 p-5 rounded-2xl text-center"><h2 class="text-xs font-bold text-rose-600 uppercase tracking-widest">หยุดเครื่อง (หนา)</h2><div id="stopThick" class="text-2xl font-bold text-slate-800 mt-1">0</div></div>
+            <div class="bg-rose-50 border border-rose-100 p-5 rounded-2xl text-center"><h2 class="text-xs font-bold text-rose-600 uppercase tracking-widest">หยุดเครื่อง (ไม่ระบุ)</h2><div id="stopNone" class="text-2xl font-bold text-slate-800 mt-1">0</div></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl text-center"><h2 class="text-xs font-bold text-emerald-600 uppercase tracking-widest">ไม่หยุดเครื่อง (บาง)</h2><div id="nonStopThin" class="text-2xl font-bold text-slate-800 mt-1">0</div></div>
+            <div class="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl text-center"><h2 class="text-xs font-bold text-emerald-600 uppercase tracking-widest">ไม่หยุดเครื่อง (หนา)</h2><div id="nonStopThick" class="text-2xl font-bold text-slate-800 mt-1">0</div></div>
+            <div class="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl text-center"><h2 class="text-xs font-bold text-emerald-600 uppercase tracking-widest">ไม่หยุดเครื่อง (ไม่ระบุ)</h2><div id="nonStopNone" class="text-2xl font-bold text-slate-800 mt-1">0</div></div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                <h2 class="font-bold text-slate-800 text-xl">แนวโน้มจำนวนครั้งของเสีย</h2>
+                <div id="chartMode" class="bg-slate-100 p-1 rounded-xl flex gap-1 shadow-inner">
+                    <button onclick="setMode('Daily')" id="btnDaily" class="px-5 py-1.5 rounded-lg font-semibold text-sm transition">Daily</button>
+                    <button onclick="setMode('Weekly')" id="btnWeekly" class="px-5 py-1.5 rounded-lg font-semibold text-sm transition bg-white shadow text-slate-800">Weekly</button>
+                    <button onclick="setMode('Monthly')" id="btnMonthly" class="px-5 py-1.5 rounded-lg font-semibold text-sm transition">Monthly</button>
+                </div>
             </div>
-            <div class="bg-blue-600 text-white p-6 rounded-xl shadow-lg">
-                <h2 class="text-sm opacity-80">น้ำหนักรวม แกรมบาง (CM105)</h2>
-                <div id="totalThin" class="text-3xl font-bold">0.00 kg</div>
-            </div>
-            <div class="bg-sky-600 text-white p-6 rounded-xl shadow-lg">
-                <h2 class="text-sm opacity-80">น้ำหนักรวม แกรมหนา (CM125)</h2>
-                <div id="totalThick" class="text-3xl font-bold">0.00 kg</div>
-            </div>
+            <canvas id="wasteChart" height="80"></canvas>
         </div>
         
         <div id="dashboard" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
@@ -80,8 +75,8 @@
 
         function setMode(mode) {
             currentMode = mode;
-            document.querySelectorAll('#chartMode button').forEach(b => b.classList.remove('bg-indigo-600', 'text-white', 'shadow-md'));
-            document.getElementById('btn' + mode).classList.add('bg-indigo-600', 'text-white', 'shadow-md');
+            document.querySelectorAll('#chartMode button').forEach(b => b.classList.remove('bg-white', 'shadow', 'text-slate-800'));
+            document.getElementById('btn' + mode).classList.add('bg-white', 'shadow', 'text-slate-800');
             applyFilters();
         }
 
@@ -90,7 +85,6 @@
             if(isNaN(d)) return "N/A";
             if(mode === 'Daily') return dateStr;
             if(mode === 'Monthly') return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}`;
-            // Weekly
             d.setHours(0,0,0,0); d.setDate(d.getDate() + 4 - (d.getDay()||7));
             const yearStart = new Date(d.getFullYear(),0,1);
             return `${d.getFullYear()}-W${Math.ceil((((d - yearStart) / 86400000) + 1)/7)}`;
@@ -126,51 +120,72 @@
                 const el = document.getElementById(id);
                 Array.from(items).sort().forEach(v => { if(v) el.innerHTML += `<option value="${v}">${v}</option>`; });
             };
-            fillSelect('filterMonth', months);
-            fillSelect('filterMachine', machines);
-            fillSelect('filterProblem', problems);
+            const fillDatalist = (id, items) => {
+                const el = document.getElementById(id);
+                Array.from(items).sort().forEach(v => { if(v) el.innerHTML += `<option value="${v}">`; });
+            };
+            fillSelect('filterMonth', months); fillSelect('filterMachine', machines); fillDatalist('problemList', problems);
             document.getElementById('status').classList.add('hidden');
         }
 
         function applyFilters() {
             const startDate = document.getElementById('filterStartDate').value;
             const endDate = document.getElementById('filterEndDate').value;
-            const monthVal = document.getElementById('filterMonth').value;
-            const machVal = document.getElementById('filterMachine').value;
-            const probVal = document.getElementById('filterProblem').value;
-
+            const problemVal = document.getElementById('filterProblem').value;
+            
             const groups = { "แกรมบาง (CM105)": {}, "แกรมหนา (CM125)": {}, "ไม่ได้ระบุประเภท": {} };
-            let totals = { "แกรมบาง (CM105)": 0, "แกรมหนา (CM125)": 0, "ไม่ได้ระบุประเภท": 0, "all": 0 };
+            const totalCounts = { "แกรมบาง (CM105)": 0, "แกรมหนา (CM125)": 0, "ไม่ได้ระบุประเภท": 0, all: 0 };
+            const stopPdr = { "แกรมบาง (CM105)": new Set(), "แกรมหนา (CM125)": new Set(), "ไม่ได้ระบุประเภท": new Set() };
+            const nonStopPdr = { "แกรมบาง (CM105)": new Set(), "แกรมหนา (CM125)": new Set(), "ไม่ได้ระบุประเภท": new Set() };
             const chartData = {};
 
             rawData.forEach(row => {
+                const pdrId = row[2] ? row[2].trim() : null;
                 const rowDate = parseDate(row[27]);
-                const matchDate = (!startDate || (rowDate && rowDate >= startDate)) && (!endDate || (rowDate && rowDate <= endDate));
-                const matchMonth = (monthVal === 'all' || row[29] === monthVal);
-                const matchMach = (machVal === 'all' || row[6] === machVal);
-                const matchProb = (probVal === 'all' || row[20] === probVal);
+                const matchesDate = (!startDate || (rowDate && rowDate >= startDate)) && (!endDate || (rowDate && rowDate <= endDate));
+                const matchesMonth = (document.getElementById('filterMonth').value === 'all' || row[29] === document.getElementById('filterMonth').value);
+                const matchesMachine = (document.getElementById('filterMachine').value === 'all' || row[6] === document.getElementById('filterMachine').value);
+                const matchesProb = (problemVal === 'ทั้งหมด' || problemVal === '' || row[20] === problemVal);
 
-                if (matchDate && matchMonth && matchMach && matchProb) {
-                    const weight = parseFloat(row[24]) || 0;
-                    const problem = row[20] || "ไม่มีระบุปัญหา";
+                if (matchesDate && matchesMonth && matchesMachine && matchesProb) {
                     let type = "ไม่ได้ระบุประเภท";
                     for(let i=33; i<=37; i++) {
                         const val = (row[i] || "").toUpperCase();
-                        if(val.includes("CM105")) type = "แกรมบาง (CM105)";
-                        else if(val.includes("CM125")) type = "แกรมหนา (CM125)";
+                        if(val.includes("CM105")) { type = "แกรมบาง (CM105)"; break; }
+                        else if(val.includes("CM125")) { type = "แกรมหนา (CM125)"; break; }
                     }
-                    groups[type][problem] = (groups[type][problem] || 0) + weight;
-                    totals[type] += weight; totals.all += weight;
+
+                    totalCounts[type]++;
+                    totalCounts.all++;
+
+                    if(pdrId) {
+                        const isStop = (row[11] && parseFloat(row[11]) !== 0);
+                        if(isStop) stopPdr[type].add(pdrId); else nonStopPdr[type].add(pdrId);
+                    }
+
+                    const probName = row[20] || "ไม่มีระบุปัญหา";
+                    const isStop = (row[11] && parseFloat(row[11]) !== 0);
+                    const problemKey = `${probName} (${isStop ? "หยุดเครื่อง" : "ไม่หยุดเครื่อง"})`;
+                    groups[type][problemKey] = (groups[type][problemKey] || 0) + 1;
 
                     const key = getTimeKey(rowDate, currentMode);
-                    if(!chartData[key]) chartData[key] = { "แกรมบาง (CM105)": 0, "แกรมหนา (CM125)": 0 };
-                    if(type !== "ไม่ได้ระบุประเภท") chartData[key][type] += weight;
+                    if(!chartData[key]) chartData[key] = { "แกรมบาง (CM105)": 0, "แกรมหนา (CM125)": 0, "ไม่ได้ระบุประเภท": 0 };
+                    chartData[key][type] += 1;
                 }
             });
 
-            document.getElementById('totalAll').innerText = totals.all.toLocaleString(undefined, {minimumFractionDigits: 2}) + " kg";
-            document.getElementById('totalThin').innerText = totals["แกรมบาง (CM105)"].toLocaleString(undefined, {minimumFractionDigits: 2}) + " kg";
-            document.getElementById('totalThick').innerText = totals["แกรมหนา (CM125)"].toLocaleString(undefined, {minimumFractionDigits: 2}) + " kg";
+            document.getElementById('totalAll').innerText = totalCounts.all;
+            document.getElementById('totalThin').innerText = totalCounts["แกรมบาง (CM105)"];
+            document.getElementById('totalThick').innerText = totalCounts["แกรมหนา (CM125)"];
+            document.getElementById('totalNone').innerText = totalCounts["ไม่ได้ระบุประเภท"];
+            
+            document.getElementById('stopThin').innerText = stopPdr["แกรมบาง (CM105)"].size;
+            document.getElementById('stopThick').innerText = stopPdr["แกรมหนา (CM125)"].size;
+            document.getElementById('stopNone').innerText = stopPdr["ไม่ได้ระบุประเภท"].size;
+            
+            document.getElementById('nonStopThin').innerText = nonStopPdr["แกรมบาง (CM105)"].size;
+            document.getElementById('nonStopThick').innerText = nonStopPdr["แกรมหนา (CM125)"].size;
+            document.getElementById('nonStopNone').innerText = nonStopPdr["ไม่ได้ระบุประเภท"].size;
             
             render(groups);
             renderChart(chartData);
@@ -185,8 +200,9 @@
                 data: {
                     labels: labels,
                     datasets: [
-                        { label: 'แกรมบาง (CM105)', data: labels.map(l => data[l]["แกรมบาง (CM105)"]), borderColor: '#2563eb', tension: 0.3 },
-                        { label: 'แกรมหนา (CM125)', data: labels.map(l => data[l]["แกรมหนา (CM125)"]), borderColor: '#0ea5e9', tension: 0.3 }
+                        { label: 'แกรมบาง (CM105)', data: labels.map(l => data[l]["แกรมบาง (CM105)"]), borderColor: '#2563eb', backgroundColor: 'rgba(37, 99, 235, 0.1)', fill: true, tension: 0.3 },
+                        { label: 'แกรมหนา (CM125)', data: labels.map(l => data[l]["แกรมหนา (CM125)"]), borderColor: '#0ea5e9', backgroundColor: 'rgba(14, 165, 233, 0.1)', fill: true, tension: 0.3 },
+                        { label: 'ไม่ได้ระบุประเภท', data: labels.map(l => data[l]["ไม่ได้ระบุประเภท"]), borderColor: '#64748b', backgroundColor: 'rgba(100, 116, 139, 0.1)', fill: true, tension: 0.3 }
                     ]
                 },
                 options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
@@ -197,15 +213,13 @@
             const container = document.getElementById('dashboard');
             container.innerHTML = '';
             for (const [name, problems] of Object.entries(groups)) {
-                const probEntries = Object.entries(problems);
-                if(probEntries.length === 0) continue;
+                if(Object.keys(problems).length === 0) continue;
                 container.innerHTML += `
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                        <h2 class="font-bold border-b pb-2 mb-4 text-gray-700">${name}</h2>
-                        ${probEntries.map(([p, w]) => `
-                            <div class="flex justify-between py-1 text-sm text-gray-600">
-                                <span>${p}</span>
-                                <span class="font-bold text-gray-900">${w.toFixed(2)} kg</span>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                        <h2 class="font-bold text-slate-800 mb-4 border-b border-slate-100 pb-3">${name}</h2>
+                        ${Object.entries(problems).map(([p, w]) => `
+                            <div class="flex justify-between py-2 text-sm text-slate-600">
+                                <span class="truncate pr-2">${p}</span><span class="font-semibold text-slate-900">${w}</span>
                             </div>
                         `).join('')}
                     </div>`;
