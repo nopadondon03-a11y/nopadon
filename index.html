@@ -3,228 +3,364 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Waste Dashboard Pro</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Dashboard วิเคราะห์ NCP รายบุคคล</title>
+    <!-- โหลดฟอนต์ Inter และ Tailwind CSS -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 </head>
-<body class="bg-slate-50 min-h-screen p-4 md:p-8">
+<body class="bg-slate-50 text-slate-800 antialiased p-4 md:p-8 font-sans min-h-screen">
     <div class="max-w-7xl mx-auto">
-        <header class="mb-8">
-            <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">Dashboard วิเคราะห์ Waste</h1>
-            <p class="text-slate-500 mt-2">สรุปข้อมูลการผลิตและของเสียรายประเภท</p>
-            <div id="status" class="text-blue-600 font-medium mt-2">กำลังโหลดข้อมูล...</div>
-        </header>
-
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-            <div><label class="block text-xs font-semibold text-slate-500 uppercase">จากวันที่</label><input type="date" id="filterStartDate" class="mt-1 block w-full border border-slate-200 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"></div>
-            <div><label class="block text-xs font-semibold text-slate-500 uppercase">ถึงวันที่</label><input type="date" id="filterEndDate" class="mt-1 block w-full border border-slate-200 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"></div>
-            <div><label class="block text-xs font-semibold text-slate-500 uppercase">เดือน</label><select id="filterMonth" class="mt-1 block w-full border border-slate-200 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"><option value="all">ทั้งหมด</option></select></div>
-            <div><label class="block text-xs font-semibold text-slate-500 uppercase">เครื่องจักร</label><select id="filterMachine" class="mt-1 block w-full border border-slate-200 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"><option value="all">ทั้งหมด</option></select></div>
+        <!-- หัวข้อหน้า Dashboard -->
+        <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-                <label class="block text-xs font-semibold text-slate-500 uppercase">ปัญหา</label>
-                <input list="problemList" id="filterProblem" placeholder="ระบุปัญหา..." class="mt-1 block w-full border border-slate-200 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500">
-                <datalist id="problemList"><option value="ทั้งหมด"></datalist>
+                <h1 class="text-3xl font-bold tracking-tight text-slate-900">Dashboard วิเคราะห์ NCP รายบุคคล</h1>
+                <p class="text-sm text-slate-500 mt-1">ระบบติดตามและวิเคราะห์สถิติจำนวนครั้งที่เกิน 50% แยกตามบุคคล เครื่องจักร และกะ</p>
             </div>
-            <div class="flex items-end"><button onclick="applyFilters()" class="w-full bg-blue-600 text-white py-2.5 rounded-lg font-bold hover:bg-blue-700 transition-all shadow-md hover:shadow-lg">กรองข้อมูล</button></div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div class="bg-slate-900 text-white p-6 rounded-2xl shadow-lg shadow-slate-200"><h2 class="text-xs uppercase tracking-wider opacity-70 font-semibold">จำนวนครั้งทั้งหมด</h2><div id="totalAll" class="text-3xl font-bold mt-2">0</div></div>
-            <div class="bg-blue-600 text-white p-6 rounded-2xl shadow-lg shadow-blue-100"><h2 class="text-xs uppercase tracking-wider opacity-70 font-semibold">แกรมบาง (CM105)</h2><div id="totalThin" class="text-3xl font-bold mt-2">0</div></div>
-            <div class="bg-sky-500 text-white p-6 rounded-2xl shadow-lg shadow-sky-100"><h2 class="text-xs uppercase tracking-wider opacity-70 font-semibold">แกรมหนา (CM125)</h2><div id="totalThick" class="text-3xl font-bold mt-2">0</div></div>
-            <div class="bg-slate-500 text-white p-6 rounded-2xl shadow-lg shadow-slate-100"><h2 class="text-xs uppercase tracking-wider opacity-70 font-semibold">ไม่ได้ระบุประเภท</h2><div id="totalNone" class="text-3xl font-bold mt-2">0</div></div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-rose-50 border border-rose-100 p-5 rounded-2xl text-center"><h2 class="text-xs font-bold text-rose-600 uppercase tracking-widest">หยุดเครื่อง (บาง)</h2><div id="stopThin" class="text-2xl font-bold text-slate-800 mt-1">0</div></div>
-            <div class="bg-rose-50 border border-rose-100 p-5 rounded-2xl text-center"><h2 class="text-xs font-bold text-rose-600 uppercase tracking-widest">หยุดเครื่อง (หนา)</h2><div id="stopThick" class="text-2xl font-bold text-slate-800 mt-1">0</div></div>
-            <div class="bg-rose-50 border border-rose-100 p-5 rounded-2xl text-center"><h2 class="text-xs font-bold text-rose-600 uppercase tracking-widest">หยุดเครื่อง (ไม่ระบุ)</h2><div id="stopNone" class="text-2xl font-bold text-slate-800 mt-1">0</div></div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl text-center"><h2 class="text-xs font-bold text-emerald-600 uppercase tracking-widest">ไม่หยุดเครื่อง (บาง)</h2><div id="nonStopThin" class="text-2xl font-bold text-slate-800 mt-1">0</div></div>
-            <div class="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl text-center"><h2 class="text-xs font-bold text-emerald-600 uppercase tracking-widest">ไม่หยุดเครื่อง (หนา)</h2><div id="nonStopThick" class="text-2xl font-bold text-slate-800 mt-1">0</div></div>
-            <div class="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl text-center"><h2 class="text-xs font-bold text-emerald-600 uppercase tracking-widest">ไม่หยุดเครื่อง (ไม่ระบุ)</h2><div id="nonStopNone" class="text-2xl font-bold text-slate-800 mt-1">0</div></div>
-        </div>
-
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
-            <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
-                <h2 class="font-bold text-slate-800 text-xl">แนวโน้มจำนวนครั้งของเสีย</h2>
-                <div id="chartMode" class="bg-slate-100 p-1 rounded-xl flex gap-1 shadow-inner">
-                    <button onclick="setMode('Daily')" id="btnDaily" class="px-5 py-1.5 rounded-lg font-semibold text-sm transition">Daily</button>
-                    <button onclick="setMode('Weekly')" id="btnWeekly" class="px-5 py-1.5 rounded-lg font-semibold text-sm transition bg-white shadow text-slate-800">Weekly</button>
-                    <button onclick="setMode('Monthly')" id="btnMonthly" class="px-5 py-1.5 rounded-lg font-semibold text-sm transition">Monthly</button>
-                </div>
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span class="w-2 h-2 mr-1.5 bg-emerald-500 rounded-full animate-pulse"></span> ระบบออนไลน์
+                </span>
             </div>
-            <canvas id="wasteChart" height="80"></canvas>
         </div>
         
-        <div id="dashboard" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        <!-- แผงตัวกรองข้อมูล -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">จากวันที่</label>
+                <input type="date" id="filter-date-start" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">ถึงวันที่</label>
+                <input type="date" id="filter-date-end" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">เครื่องจักร</label>
+                <select id="filter-machine" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                    <option value="all">ทั้งหมด</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">กะ</label>
+                <select id="filter-shift" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                    <option value="all">ทั้งหมด</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- ส่วนแสดงกราฟเส้น พร้อมปุ่มสลับมุมมอง Daily / Weekly / Monthly -->
+        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200/80 mb-8">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900">📈 แนวโน้มจำนวนครั้งที่เกิน 50% รายบุคคล</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">แสดงข้อมูลสถิติเชิงเส้นแบ่งตามช่วงเวลา</p>
+                </div>
+                <!-- ปุ่มสลับมุมมองสไตล์โมเดิร์น -->
+                <div class="flex bg-slate-100 p-1.5 rounded-xl shadow-inner border border-slate-200">
+                    <button onclick="setChartView('daily')" id="btn-daily" class="px-5 py-2 text-xs font-semibold rounded-lg transition-all duration-200 bg-indigo-600 text-white shadow-sm">Daily</button>
+                    <button onclick="setChartView('weekly')" id="btn-weekly" class="px-5 py-2 text-xs font-semibold rounded-lg transition-all duration-200 text-slate-600 hover:text-slate-900">Weekly</button>
+                    <button onclick="setChartView('monthly')" id="btn-monthly" class="px-5 py-2 text-xs font-semibold rounded-lg transition-all duration-200 text-slate-600 hover:text-slate-900">Monthly</button>
+                </div>
+            </div>
+            <div class="relative h-96 w-full">
+                <canvas id="overChart"></canvas>
+            </div>
+        </div>
+
+        <!-- การ์ดรายบุคคล -->
+        <div id="blocks-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
     </div>
 
     <script>
-        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTqoJ5yKma3mpIUZZbwmYX92PEJ1z6_ntn2BGqQXR310jkITIHNzg4Pgf12BklBo_5iS9QHnoy15jQU/pub?output=csv';
+        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSJLOKv2HXPLKnHoo3hc57LkyR4UIMbSsxQQb6BrCnqJplzbtJKc6Hhj7vx8_hYABvBMN4i8zNvcY0A/pub?gid=0&single=true&output=csv';
         let rawData = [];
-        let myChart = null;
-        let currentMode = 'Weekly';
+        let chartInstance = null;
+        let currentViewMode = 'daily';
 
-        function setMode(mode) {
-            currentMode = mode;
-            document.querySelectorAll('#chartMode button').forEach(b => b.classList.remove('bg-white', 'shadow', 'text-slate-800'));
-            document.getElementById('btn' + mode).classList.add('bg-white', 'shadow', 'text-slate-800');
-            applyFilters();
+        // ตำแหน่งดัชนีคอลัมน์: Name(AI)=34, Percent(AK)=36, Problem(U)=20, Total(I)=8, NCP(P)=15, PDR(C)=2, Date(AB)=27, Machine(G)=6, Shift(B)=1
+        const NAME_IDX = 34, PER_IDX = 36, PROB_IDX = 20, TOTAL_IDX = 8, NCP_IDX = 15, PDR_IDX = 2, DATE_IDX = 27, MACHINE_IDX = 6, SHIFT_IDX = 1;
+
+        async function init() {
+            try {
+                const response = await fetch(sheetUrl);
+                const csvText = await response.text();
+                Papa.parse(csvText, {
+                    header: false, skipEmptyLines: true,
+                    complete: (res) => {
+                        rawData = res.data.slice(1);
+                        initFilters();
+                        renderDashboard();
+                    }
+                });
+            } catch (err) {
+                console.error("ไม่สามารถโหลดข้อมูลได้", err);
+            }
         }
 
-        function getTimeKey(dateStr, mode) {
-            const d = new Date(dateStr);
-            if(isNaN(d)) return "N/A";
-            if(mode === 'Daily') return dateStr;
-            if(mode === 'Monthly') return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}`;
-            d.setHours(0,0,0,0); d.setDate(d.getDate() + 4 - (d.getDay()||7));
-            const yearStart = new Date(d.getFullYear(),0,1);
-            return `${d.getFullYear()}-W${Math.ceil((((d - yearStart) / 86400000) + 1)/7)}`;
+        function initFilters() {
+            const machines = [...new Set(rawData.map(r => r[MACHINE_IDX]))].filter(x => x).sort();
+            const shifts = [...new Set(rawData.map(r => r[SHIFT_IDX]))].filter(x => x).sort();
+            machines.forEach(m => document.getElementById('filter-machine').innerHTML += `<option value="${m}">${m}</option>`);
+            shifts.forEach(s => document.getElementById('filter-shift').innerHTML += `<option value="${s}">${s}</option>`);
         }
 
-        function parseDate(dateStr) {
-            if (!dateStr) return null;
-            if (dateStr.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)) {
-                const parts = dateStr.split('/');
-                return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        function toggleDetails(id) {
+            const el = document.getElementById(id);
+            el.style.display = (el.style.display === "none") ? "block" : "none";
+        }
+
+        function parseDateToStandard(dateStr) {
+            if (!dateStr) return '';
+            dateStr = dateStr.trim();
+            if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+            
+            const parts = dateStr.split(/[\/\-]/);
+            if (parts.length === 3) {
+                let d = parts[0], m = parts[1], y = parts[2];
+                if (y.length === 2) y = '20' + y;
+                if (y.length === 4 && m.length <= 2 && d.length <= 2) {
+                    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+                }
+            }
+            const parsed = new Date(dateStr);
+            if (!isNaN(parsed.getTime())) {
+                const y = parsed.getFullYear();
+                const m = String(parsed.getMonth() + 1).padStart(2, '0');
+                const d = String(parsed.getDate()).padStart(2, '0');
+                return `${y}-${m}-${d}`;
             }
             return dateStr;
         }
 
-        async function init() {
-            const res = await fetch(sheetUrl);
-            const csv = await res.text();
-            Papa.parse(csv, { header: false, skipEmptyLines: true, complete: (results) => {
-                rawData = results.data.slice(1);
-                populateSelectFilters();
-                applyFilters();
-            }});
+        function cleanPercent(valStr) {
+            if (!valStr) return NaN;
+            const cleaned = String(valStr).replace(/%/g, '').trim();
+            return parseFloat(cleaned);
         }
 
-        function populateSelectFilters() {
-            const months = new Set(), machines = new Set(), problems = new Set();
-            rawData.forEach(r => {
-                if(r[29]) months.add(r[29]);
-                if(r[6]) machines.add(r[6]);
-                if(r[20]) problems.add(r[20]);
+        function setChartView(mode) {
+            currentViewMode = mode;
+            ['daily', 'weekly', 'monthly'].forEach(m => {
+                const btn = document.getElementById(`btn-${m}`);
+                if (m === mode) {
+                    btn.className = "px-5 py-2 text-xs font-semibold rounded-lg transition-all duration-200 bg-indigo-600 text-white shadow-sm";
+                } else {
+                    btn.className = "px-5 py-2 text-xs font-semibold rounded-lg transition-all duration-200 text-slate-600 hover:text-slate-900";
+                }
             });
-            const fillSelect = (id, items) => {
-                const el = document.getElementById(id);
-                Array.from(items).sort().forEach(v => { if(v) el.innerHTML += `<option value="${v}">${v}</option>`; });
-            };
-            const fillDatalist = (id, items) => {
-                const el = document.getElementById(id);
-                Array.from(items).sort().forEach(v => { if(v) el.innerHTML += `<option value="${v}">`; });
-            };
-            fillSelect('filterMonth', months); fillSelect('filterMachine', machines); fillDatalist('problemList', problems);
-            document.getElementById('status').classList.add('hidden');
+            renderDashboard();
         }
 
-        function applyFilters() {
-            const startDate = document.getElementById('filterStartDate').value;
-            const endDate = document.getElementById('filterEndDate').value;
-            const problemVal = document.getElementById('filterProblem').value;
+        function getWeekNumber(d) {
+            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+            var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+            var weekNo = Math.ceil(( ( (d - yearStart) / 86400000) + 1)/7);
+            return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
+        }
+
+        function renderDashboard() {
+            const container = document.getElementById('blocks-container');
+            container.innerHTML = '';
             
-            const groups = { "แกรมบาง (CM105)": {}, "แกรมหนา (CM125)": {}, "ไม่ได้ระบุประเภท": {} };
-            const totalCounts = { "แกรมบาง (CM105)": 0, "แกรมหนา (CM125)": 0, "ไม่ได้ระบุประเภท": 0, all: 0 };
-            const stopPdr = { "แกรมบาง (CM105)": new Set(), "แกรมหนา (CM125)": new Set(), "ไม่ได้ระบุประเภท": new Set() };
-            const nonStopPdr = { "แกรมบาง (CM105)": new Set(), "แกรมหนา (CM125)": new Set(), "ไม่ได้ระบุประเภท": new Set() };
-            const chartData = {};
+            const fStart = document.getElementById('filter-date-start').value;
+            const fEnd = document.getElementById('filter-date-end').value;
+            const fMach = document.getElementById('filter-machine').value;
+            const fShift = document.getElementById('filter-shift').value;
 
-            rawData.forEach(row => {
-                const pdrId = row[2] ? row[2].trim() : null;
-                const rowDate = parseDate(row[27]);
-                const matchesDate = (!startDate || (rowDate && rowDate >= startDate)) && (!endDate || (rowDate && rowDate <= endDate));
-                const matchesMonth = (document.getElementById('filterMonth').value === 'all' || row[29] === document.getElementById('filterMonth').value);
-                const matchesMachine = (document.getElementById('filterMachine').value === 'all' || row[6] === document.getElementById('filterMachine').value);
-                const matchesProb = (problemVal === 'ทั้งหมด' || problemVal === '' || row[20] === problemVal);
+            const filtered = rawData.filter(r => {
+                const rowDate = parseDateToStandard(r[DATE_IDX]);
+                const matchDate = (!fStart || rowDate >= fStart) && (!fEnd || rowDate <= fEnd);
+                const matchMach = (fMach === 'all' || r[MACHINE_IDX] === fMach);
+                const matchShift = (fShift === 'all' || r[SHIFT_IDX] === fShift);
+                return matchDate && matchMach && matchShift;
+            });
 
-                if (matchesDate && matchesMonth && matchesMachine && matchesProb) {
-                    let type = "ไม่ได้ระบุประเภท";
-                    for(let i=33; i<=37; i++) {
-                        const val = (row[i] || "").toUpperCase();
-                        if(val.includes("CM105")) { type = "แกรมบาง (CM105)"; break; }
-                        else if(val.includes("CM125")) { type = "แกรมหนา (CM125)"; break; }
+            const grouped = filtered.reduce((acc, row) => {
+                const name = row[NAME_IDX] || 'ไม่ระบุชื่อ';
+                if (!acc[name]) acc[name] = { over: [], under: [] };
+                const val = cleanPercent(row[PER_IDX]);
+                if (!isNaN(val)) {
+                    val > 50 ? acc[name].over.push(row) : acc[name].under.push(row);
+                }
+                return acc;
+            }, {});
+
+            let timeLabelsSet = new Set();
+            filtered.forEach(row => {
+                const val = cleanPercent(row[PER_IDX]);
+                if (!isNaN(val) && val > 50) {
+                    const standardDate = parseDateToStandard(row[DATE_IDX]);
+                    if (currentViewMode === 'daily') {
+                        timeLabelsSet.add(standardDate || 'ไม่ระบุวันที่');
+                    } else if (currentViewMode === 'weekly') {
+                        const dObj = standardDate ? new Date(standardDate) : null;
+                        timeLabelsSet.add(dObj && !isNaN(dObj) ? getWeekNumber(dObj) : 'ไม่ระบุสัปดาห์');
+                    } else {
+                        timeLabelsSet.add(standardDate ? standardDate.substring(0, 7) : 'ไม่ระบุเดือน');
                     }
-
-                    totalCounts[type]++;
-                    totalCounts.all++;
-
-                    if(pdrId) {
-                        const isStop = (row[11] && parseFloat(row[11]) !== 0);
-                        if(isStop) stopPdr[type].add(pdrId); else nonStopPdr[type].add(pdrId);
-                    }
-
-                    const probName = row[20] || "ไม่มีระบุปัญหา";
-                    const isStop = (row[11] && parseFloat(row[11]) !== 0);
-                    const problemKey = `${probName} (${isStop ? "หยุดเครื่อง" : "ไม่หยุดเครื่อง"})`;
-                    groups[type][problemKey] = (groups[type][problemKey] || 0) + 1;
-
-                    const key = getTimeKey(rowDate, currentMode);
-                    if(!chartData[key]) chartData[key] = { "แกรมบาง (CM105)": 0, "แกรมหนา (CM125)": 0, "ไม่ได้ระบุประเภท": 0 };
-                    chartData[key][type] += 1;
                 }
             });
 
-            document.getElementById('totalAll').innerText = totalCounts.all;
-            document.getElementById('totalThin').innerText = totalCounts["แกรมบาง (CM105)"];
-            document.getElementById('totalThick').innerText = totalCounts["แกรมหนา (CM125)"];
-            document.getElementById('totalNone').innerText = totalCounts["ไม่ได้ระบุประเภท"];
+            const chartLabels = Array.from(timeLabelsSet).sort();
+            const personNames = Object.keys(grouped).filter(name => grouped[name].over.length > 0);
             
-            document.getElementById('stopThin').innerText = stopPdr["แกรมบาง (CM105)"].size;
-            document.getElementById('stopThick').innerText = stopPdr["แกรมหนา (CM125)"].size;
-            document.getElementById('stopNone').innerText = stopPdr["ไม่ได้ระบุประเภท"].size;
-            
-            document.getElementById('nonStopThin').innerText = nonStopPdr["แกรมบาง (CM105)"].size;
-            document.getElementById('nonStopThick').innerText = nonStopPdr["แกรมหนา (CM125)"].size;
-            document.getElementById('nonStopNone').innerText = nonStopPdr["ไม่ได้ระบุประเภท"].size;
-            
-            render(groups);
-            renderChart(chartData);
+            const colorPalette = [
+                'rgb(99, 102, 241)', 'rgb(239, 68, 68)', 'rgb(16, 185, 129)', 
+                'rgb(245, 158, 11)', 'rgb(139, 92, 246)', 'rgb(236, 72, 153)', 
+                'rgb(14, 165, 233)', 'rgb(234, 179, 8)'
+            ];
+
+            const datasets = personNames.map((name, idx) => {
+                const color = colorPalette[idx % colorPalette.length];
+                const dataCounts = chartLabels.map(label => {
+                    return grouped[name].over.filter(r => {
+                        const standardDate = parseDateToStandard(r[DATE_IDX]);
+                        let key = '';
+                        if (currentViewMode === 'daily') {
+                            key = standardDate || 'ไม่ระบุวันที่';
+                        } else if (currentViewMode === 'weekly') {
+                            const dObj = standardDate ? new Date(standardDate) : null;
+                            key = dObj && !isNaN(dObj) ? getWeekNumber(dObj) : 'ไม่ระบุสัปดาห์';
+                        } else {
+                            key = standardDate ? standardDate.substring(0, 7) : 'ไม่ระบุเดือน';
+                        }
+                        return key === label;
+                    }).length;
+                });
+
+                return {
+                    label: name,
+                    data: dataCounts,
+                    borderColor: color,
+                    backgroundColor: color,
+                    borderWidth: 2.5,
+                    pointRadius: 4.5,
+                    pointHoverRadius: 6,
+                    tension: 0.25
+                };
+            });
+
+            Object.entries(grouped).forEach(([name, g], index) => {
+                const idOver = `o-${index}`, idUnder = `u-${index}`;
+                const block = document.createElement('div');
+                block.className = "bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col justify-between hover:shadow-md transition-shadow";
+                
+                const renderItems = (list) => list.map(r => {
+                    const rawVal = String(r[PER_IDX]).replace(/%/g, '').trim();
+                    return `<li class="border-b border-slate-100 pb-2 mb-2 last:border-0 last:mb-0 last:pb-0">
+                        <div class="flex justify-between items-start font-medium text-slate-700">
+                            <span>PDR: ${r[PDR_IDX] || '-'}</span>
+                            <span class="text-slate-500 text-[11px] bg-white px-2 py-0.5 rounded border border-slate-200">${r[MACHINE_IDX] || '-'}</span>
+                        </div>
+                        <div class="text-slate-600 text-xs mt-1"><b>ปัญหา:</b> ${r[PROB_IDX] || '-'}</div>
+                        <div class="text-slate-500 text-[11px] mt-1 flex gap-3">
+                            <span>ผลิต: <b>${r[TOTAL_IDX] || 0}</b></span>
+                            <span>NCP: <b>${r[NCP_IDX] || 0}</b></span>
+                            <span class="text-indigo-600 font-semibold">ค่า: ${rawVal}%</span>
+                        </div>
+                    </li>`;
+                }).join('');
+
+                block.innerHTML = `
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800 mb-4 pb-2 border-b border-slate-100 flex items-center justify-between">
+                            <span>${name}</span>
+                            <span class="text-xs font-normal text-slate-500">รวม ${g.over.length + g.under.length} รายการ</span>
+                        </h2>
+                        <div class="mb-3">
+                            <button onclick="toggleDetails('${idOver}')" class="w-full text-left bg-rose-50/80 hover:bg-rose-100/80 text-rose-700 font-semibold text-sm p-3 rounded-xl transition flex justify-between items-center border border-rose-100">
+                                <span>⚠️ เกิน 50%</span>
+                                <span class="bg-rose-200/60 px-2.5 py-0.5 rounded-full text-xs font-bold">${g.over.length}</span>
+                            </button>
+                            <ul id="${idOver}" style="display:none" class="text-xs text-slate-600 mt-2 space-y-1 bg-rose-50/30 p-3.5 rounded-xl border border-rose-100 max-h-52 overflow-y-auto">
+                                ${g.over.length > 0 ? renderItems(g.over) : '<li class="text-slate-400 italic">ไม่มีข้อมูล</li>'}
+                            </ul>
+                        </div>
+                        <div>
+                            <button onclick="toggleDetails('${idUnder}')" class="w-full text-left bg-emerald-50/80 hover:bg-emerald-100/80 text-emerald-700 font-semibold text-sm p-3 rounded-xl transition flex justify-between items-center border border-emerald-100">
+                                <span>✅ ปกติ</span>
+                                <span class="bg-emerald-200/60 px-2.5 py-0.5 rounded-full text-xs font-bold">${g.under.length}</span>
+                            </button>
+                            <ul id="${idUnder}" style="display:none" class="text-xs text-slate-600 mt-2 space-y-1 bg-emerald-50/30 p-3.5 rounded-xl border border-emerald-100 max-h-52 overflow-y-auto">
+                                ${g.under.length > 0 ? renderItems(g.under) : '<li class="text-slate-400 italic">ไม่มีข้อมูล</li>'}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(block);
+            });
+
+            updateChart(chartLabels, datasets);
         }
 
-        function renderChart(data) {
-            const labels = Object.keys(data).sort();
-            const ctx = document.getElementById('wasteChart').getContext('2d');
-            if(myChart) myChart.destroy();
-            myChart = new Chart(ctx, {
+        function updateChart(labels, datasets) {
+            const ctx = document.getElementById('overChart').getContext('2d');
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+            
+            Chart.register(ChartDataLabels);
+
+            chartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
-                    datasets: [
-                        { label: 'แกรมบาง (CM105)', data: labels.map(l => data[l]["แกรมบาง (CM105)"]), borderColor: '#2563eb', backgroundColor: 'rgba(37, 99, 235, 0.1)', fill: true, tension: 0.3 },
-                        { label: 'แกรมหนา (CM125)', data: labels.map(l => data[l]["แกรมหนา (CM125)"]), borderColor: '#0ea5e9', backgroundColor: 'rgba(14, 165, 233, 0.1)', fill: true, tension: 0.3 },
-                        { label: 'ไม่ได้ระบุประเภท', data: labels.map(l => data[l]["ไม่ได้ระบุประเภท"]), borderColor: '#64748b', backgroundColor: 'rgba(100, 116, 139, 0.1)', fill: true, tension: 0.3 }
-                    ]
+                    datasets: datasets
                 },
-                options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1, font: { family: 'Inter' } },
+                            grid: { color: 'rgba(226, 232, 240, 0.6)' },
+                            grace: '25%'
+                        },
+                        x: {
+                            ticks: { font: { family: 'Inter' } },
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { 
+                            position: 'top',
+                            labels: { font: { family: 'Inter', weight: 500 }, boxWidth: 14 }
+                        },
+                        datalabels: {
+                            align: 'top',
+                            anchor: 'end',
+                            color: '#334155',
+                            font: {
+                                family: 'Inter',
+                                weight: 'bold',
+                                size: 10
+                            },
+                            formatter: (value) => value > 0 ? value : ''
+                        }
+                    }
+                }
             });
         }
 
-        function render(groups) {
-            const container = document.getElementById('dashboard');
-            container.innerHTML = '';
-            for (const [name, problems] of Object.entries(groups)) {
-                if(Object.keys(problems).length === 0) continue;
-                container.innerHTML += `
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                        <h2 class="font-bold text-slate-800 mb-4 border-b border-slate-100 pb-3">${name}</h2>
-                        ${Object.entries(problems).map(([p, w]) => `
-                            <div class="flex justify-between py-2 text-sm text-slate-600">
-                                <span class="truncate pr-2">${p}</span><span class="font-semibold text-slate-900">${w}</span>
-                            </div>
-                        `).join('')}
-                    </div>`;
-            }
-        }
+        ['filter-date-start', 'filter-date-end', 'filter-machine', 'filter-shift'].forEach(id => {
+            document.getElementById(id).addEventListener('change', renderDashboard);
+        });
+
         init();
     </script>
 </body>
