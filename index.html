@@ -4,75 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard วิเคราะห์ NCP รายบุคคล</title>
-    <!-- โหลดฟอนต์ Inter และ Tailwind CSS -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                }
-            }
-        }
-    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased p-4 md:p-8 font-sans min-h-screen">
+<body class="bg-gray-100 p-8">
     <div class="max-w-7xl mx-auto">
-        <!-- หัวข้อหน้า Dashboard -->
-        <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-                <h1 class="text-3xl font-bold tracking-tight text-slate-900">Dashboard วิเคราะห์ NCP รายบุคคล</h1>
-                <p class="text-sm text-slate-500 mt-1">ระบบติดตามและวิเคราะห์สถิติจำนวนครั้งที่เกิน 50% แยกตามบุคคล เครื่องจักร และกะ</p>
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    <span class="w-2 h-2 mr-1.5 bg-emerald-500 rounded-full animate-pulse"></span> ระบบออนไลน์
-                </span>
-            </div>
-        </div>
+        <h1 class="text-3xl font-bold mb-8 text-gray-800">สรุปการวิเคราะห์ NCP แยกรายบุคคล</h1>
         
-        <!-- แผงตัวกรองข้อมูล -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <!-- ตัวกรองข้อมูล -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 mb-8 grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">จากวันที่</label>
-                <input type="date" id="filter-date-start" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                <label class="block text-sm font-bold text-gray-700">จากวันที่</label>
+                <input type="date" id="filter-date-start" class="mt-1 block w-full border rounded-md p-2">
             </div>
             <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">ถึงวันที่</label>
-                <input type="date" id="filter-date-end" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                <label class="block text-sm font-bold text-gray-700">ถึงวันที่</label>
+                <input type="date" id="filter-date-end" class="mt-1 block w-full border rounded-md p-2">
             </div>
             <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">เครื่องจักร</label>
-                <select id="filter-machine" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
-                    <option value="all">ทั้งหมด</option>
-                </select>
+                <label class="block text-sm font-bold text-gray-700">เครื่องจักร</label>
+                <select id="filter-machine" class="mt-1 block w-full border rounded-md p-2"><option value="all">ทั้งหมด</option></select>
             </div>
             <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">กะ</label>
-                <select id="filter-shift" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
-                    <option value="all">ทั้งหมด</option>
-                </select>
+                <label class="block text-sm font-bold text-gray-700">กะ</label>
+                <select id="filter-shift" class="mt-1 block w-full border rounded-md p-2"><option value="all">ทั้งหมด</option></select>
             </div>
         </div>
 
         <!-- ส่วนแสดงกราฟเส้น พร้อมปุ่มสลับมุมมอง Daily / Weekly / Monthly -->
-        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200/80 mb-8">
-            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
-                <div>
-                    <h2 class="text-xl font-bold text-slate-900">📈 แนวโน้มจำนวนครั้งที่เกิน 50% รายบุคคล</h2>
-                    <p class="text-xs text-slate-500 mt-0.5">แสดงข้อมูลสถิติเชิงเส้นแบ่งตามช่วงเวลา</p>
-                </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 mb-8">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                <h2 class="text-xl font-bold text-gray-800">📈 แนวโน้มจำนวนครั้งที่เกิน 2 พาเลทรายบุคคล</h2>
                 <!-- ปุ่มสลับมุมมองสไตล์โมเดิร์น -->
-                <div class="flex bg-slate-100 p-1.5 rounded-xl shadow-inner border border-slate-200">
-                    <button onclick="setChartView('daily')" id="btn-daily" class="px-5 py-2 text-xs font-semibold rounded-lg transition-all duration-200 bg-indigo-600 text-white shadow-sm">Daily</button>
-                    <button onclick="setChartView('weekly')" id="btn-weekly" class="px-5 py-2 text-xs font-semibold rounded-lg transition-all duration-200 text-slate-600 hover:text-slate-900">Weekly</button>
-                    <button onclick="setChartView('monthly')" id="btn-monthly" class="px-5 py-2 text-xs font-semibold rounded-lg transition-all duration-200 text-slate-600 hover:text-slate-900">Monthly</button>
+                <div class="flex bg-gray-100 p-1 rounded-xl shadow-inner">
+                    <button onclick="setChartView('daily')" id="btn-daily" class="px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 bg-indigo-600 text-white shadow-sm">Daily</button>
+                    <button onclick="setChartView('weekly')" id="btn-weekly" class="px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 text-gray-600 hover:text-gray-900">Weekly</button>
+                    <button onclick="setChartView('monthly')" id="btn-monthly" class="px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 text-gray-600 hover:text-gray-900">Monthly</button>
                 </div>
             </div>
             <div class="relative h-96 w-full">
@@ -88,10 +57,10 @@
         const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSJLOKv2HXPLKnHoo3hc57LkyR4UIMbSsxQQb6BrCnqJplzbtJKc6Hhj7vx8_hYABvBMN4i8zNvcY0A/pub?gid=0&single=true&output=csv';
         let rawData = [];
         let chartInstance = null;
-        let currentViewMode = 'daily';
+        let currentViewMode = 'daily'; // ค่าเริ่มต้นเป็นแบบรายวัน
 
-        // ตำแหน่งดัชนีคอลัมน์: Name(AI)=34, Percent(AK)=36, Problem(U)=20, Total(I)=8, NCP(P)=15, PDR(C)=2, Date(AB)=27, Machine(G)=6, Shift(B)=1
-        const NAME_IDX = 34, PER_IDX = 36, PROB_IDX = 20, TOTAL_IDX = 8, NCP_IDX = 15, PDR_IDX = 2, DATE_IDX = 27, MACHINE_IDX = 6, SHIFT_IDX = 1;
+        // ดัชนีคอลัมน์: Name(AI)=34, AM=38, Problem(U)=20, Total(I)=8, NCP(P)=15, PDR(C)=2, Date(AB)=27, Machine(G)=6, Shift(B)=1
+        const NAME_IDX = 34, AM_IDX = 38, PROB_IDX = 20, TOTAL_IDX = 8, NCP_IDX = 15, PDR_IDX = 2, DATE_IDX = 27, MACHINE_IDX = 6, SHIFT_IDX = 1;
 
         async function init() {
             try {
@@ -156,9 +125,9 @@
             ['daily', 'weekly', 'monthly'].forEach(m => {
                 const btn = document.getElementById(`btn-${m}`);
                 if (m === mode) {
-                    btn.className = "px-5 py-2 text-xs font-semibold rounded-lg transition-all duration-200 bg-indigo-600 text-white shadow-sm";
+                    btn.className = "px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 bg-indigo-600 text-white shadow-sm";
                 } else {
-                    btn.className = "px-5 py-2 text-xs font-semibold rounded-lg transition-all duration-200 text-slate-600 hover:text-slate-900";
+                    btn.className = "px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 text-gray-600 hover:text-gray-900";
                 }
             });
             renderDashboard();
@@ -192,17 +161,18 @@
             const grouped = filtered.reduce((acc, row) => {
                 const name = row[NAME_IDX] || 'ไม่ระบุชื่อ';
                 if (!acc[name]) acc[name] = { over: [], under: [] };
-                const val = cleanPercent(row[PER_IDX]);
+                const val = parseFloat(row[AM_IDX]);
                 if (!isNaN(val)) {
-                    val > 50 ? acc[name].over.push(row) : acc[name].under.push(row);
+                    val > 2 ? acc[name].over.push(row) : acc[name].under.push(row);
                 }
                 return acc;
             }, {});
 
+            // เตรียมข้อมูลสำหรับกราฟเส้น
             let timeLabelsSet = new Set();
             filtered.forEach(row => {
-                const val = cleanPercent(row[PER_IDX]);
-                if (!isNaN(val) && val > 50) {
+                const val = parseFloat(row[AM_IDX]);
+                if (!isNaN(val) && val > 2) {
                     const standardDate = parseDateToStandard(row[DATE_IDX]);
                     if (currentViewMode === 'daily') {
                         timeLabelsSet.add(standardDate || 'ไม่ระบุวันที่');
@@ -216,6 +186,8 @@
             });
 
             const chartLabels = Array.from(timeLabelsSet).sort();
+            
+            // รวบรวมรายชื่อบุคคลทั้งหมดที่ผ่านการกรองและมีค่า > 50%
             const personNames = Object.keys(grouped).filter(name => grouped[name].over.length > 0);
             
             const colorPalette = [
@@ -247,56 +219,38 @@
                     data: dataCounts,
                     borderColor: color,
                     backgroundColor: color,
-                    borderWidth: 2.5,
-                    pointRadius: 4.5,
-                    pointHoverRadius: 6,
-                    tension: 0.25
+                    borderWidth: 2,
+                    pointRadius: 4,
+                    tension: 0.2
                 };
             });
 
             Object.entries(grouped).forEach(([name, g], index) => {
                 const idOver = `o-${index}`, idUnder = `u-${index}`;
                 const block = document.createElement('div');
-                block.className = "bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col justify-between hover:shadow-md transition-shadow";
+                block.className = "bg-white p-6 rounded-2xl shadow-md border border-gray-200 flex flex-col justify-between";
                 
                 const renderItems = (list) => list.map(r => {
-                    const rawVal = String(r[PER_IDX]).replace(/%/g, '').trim();
-                    return `<li class="border-b border-slate-100 pb-2 mb-2 last:border-0 last:mb-0 last:pb-0">
-                        <div class="flex justify-between items-start font-medium text-slate-700">
-                            <span>PDR: ${r[PDR_IDX] || '-'}</span>
-                            <span class="text-slate-500 text-[11px] bg-white px-2 py-0.5 rounded border border-slate-200">${r[MACHINE_IDX] || '-'}</span>
-                        </div>
-                        <div class="text-slate-600 text-xs mt-1"><b>ปัญหา:</b> ${r[PROB_IDX] || '-'}</div>
-                        <div class="text-slate-500 text-[11px] mt-1 flex gap-3">
-                            <span>ผลิต: <b>${r[TOTAL_IDX] || 0}</b></span>
-                            <span>NCP: <b>${r[NCP_IDX] || 0}</b></span>
-                            <span class="text-indigo-600 font-semibold">ค่า: ${rawVal}%</span>
-                        </div>
+                    return `<li class="border-b pb-1 mb-1 border-gray-100">
+                        • <b>PDR:</b> ${r[PDR_IDX] || '-'} | <b>เครื่องจักร:</b> ${r[MACHINE_IDX] || '-'}<br>
+                        <b>ปัญหา:</b> ${r[PROB_IDX] || '-'}<br>
+                        <span class="text-gray-500 text-[11px]">ผลิต: ${r[TOTAL_IDX] || 0} | NCP: ${r[NCP_IDX] || 0} | <b>ค่า: ${r[AM_IDX] || 0} พาเลท</b></span>
                     </li>`;
                 }).join('');
 
                 block.innerHTML = `
                     <div>
-                        <h2 class="text-lg font-bold text-slate-800 mb-4 pb-2 border-b border-slate-100 flex items-center justify-between">
-                            <span>${name}</span>
-                            <span class="text-xs font-normal text-slate-500">รวม ${g.over.length + g.under.length} รายการ</span>
-                        </h2>
-                        <div class="mb-3">
-                            <button onclick="toggleDetails('${idOver}')" class="w-full text-left bg-rose-50/80 hover:bg-rose-100/80 text-rose-700 font-semibold text-sm p-3 rounded-xl transition flex justify-between items-center border border-rose-100">
-                                <span>⚠️ เกิน 50%</span>
-                                <span class="bg-rose-200/60 px-2.5 py-0.5 rounded-full text-xs font-bold">${g.over.length}</span>
-                            </button>
-                            <ul id="${idOver}" style="display:none" class="text-xs text-slate-600 mt-2 space-y-1 bg-rose-50/30 p-3.5 rounded-xl border border-rose-100 max-h-52 overflow-y-auto">
-                                ${g.over.length > 0 ? renderItems(g.over) : '<li class="text-slate-400 italic">ไม่มีข้อมูล</li>'}
+                        <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">${name}</h2>
+                        <div class="mb-4">
+                            <button onclick="toggleDetails('${idOver}')" class="text-red-600 font-bold w-full text-left bg-red-50 p-2 rounded hover:bg-red-100 transition">⚠️ เกิน 2 พาเลท: ${g.over.length} รายการ</button>
+                            <ul id="${idOver}" style="display:none" class="text-xs text-gray-600 mt-2 space-y-2 bg-red-50 p-3 rounded max-h-48 overflow-y-auto">
+                                ${g.over.length > 0 ? renderItems(g.over) : '<li>ไม่มีข้อมูล</li>'}
                             </ul>
                         </div>
                         <div>
-                            <button onclick="toggleDetails('${idUnder}')" class="w-full text-left bg-emerald-50/80 hover:bg-emerald-100/80 text-emerald-700 font-semibold text-sm p-3 rounded-xl transition flex justify-between items-center border border-emerald-100">
-                                <span>✅ ปกติ</span>
-                                <span class="bg-emerald-200/60 px-2.5 py-0.5 rounded-full text-xs font-bold">${g.under.length}</span>
-                            </button>
-                            <ul id="${idUnder}" style="display:none" class="text-xs text-slate-600 mt-2 space-y-1 bg-emerald-50/30 p-3.5 rounded-xl border border-emerald-100 max-h-52 overflow-y-auto">
-                                ${g.under.length > 0 ? renderItems(g.under) : '<li class="text-slate-400 italic">ไม่มีข้อมูล</li>'}
+                            <button onclick="toggleDetails('${idUnder}')" class="text-green-600 font-bold w-full text-left bg-green-50 p-2 rounded hover:bg-green-100 transition">✅ ปกติ: ${g.under.length} รายการ</button>
+                            <ul id="${idUnder}" style="display:none" class="text-xs text-gray-600 mt-2 space-y-2 bg-green-50 p-3 rounded max-h-48 overflow-y-auto">
+                                ${g.under.length > 0 ? renderItems(g.under) : '<li>ไม่มีข้อมูล</li>'}
                             </ul>
                         </div>
                     </div>
@@ -327,26 +281,17 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            ticks: { stepSize: 1, font: { family: 'Inter' } },
-                            grid: { color: 'rgba(226, 232, 240, 0.6)' },
-                            grace: '25%'
-                        },
-                        x: {
-                            ticks: { font: { family: 'Inter' } },
-                            grid: { display: false }
+                            ticks: { stepSize: 1 },
+                            grace: '20%'
                         }
                     },
                     plugins: {
-                        legend: { 
-                            position: 'top',
-                            labels: { font: { family: 'Inter', weight: 500 }, boxWidth: 14 }
-                        },
+                        legend: { position: 'top' },
                         datalabels: {
                             align: 'top',
                             anchor: 'end',
-                            color: '#334155',
+                            color: '#1f2937',
                             font: {
-                                family: 'Inter',
                                 weight: 'bold',
                                 size: 10
                             },
