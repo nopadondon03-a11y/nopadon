@@ -3,41 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard วิเคราะห์ NCP รายบุคคล</title>
+    <title>Dashboard รวมระบบ (NCP & Waste)</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Font: Inter & Prompt for Thai legibility -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- PapaParse for CSV reading -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <!-- Chart.js and DataLabels plugin -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <style>
+        body {
+            font-family: 'Prompt', 'Inter', sans-serif;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 p-8">
-    <div class="max-w-7xl mx-auto">
-        <h1 class="text-3xl font-bold mb-8 text-gray-800">สรุปการวิเคราะห์ NCP แยกรายบุคคล</h1>
-        
-        <!-- ตัวกรองข้อมูล -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 mb-8 grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-                <label class="block text-sm font-bold text-gray-700">จากวันที่</label>
-                <input type="date" id="filter-date-start" class="mt-1 block w-full border rounded-md p-2">
-            </div>
-            <div>
-                <label class="block text-sm font-bold text-gray-700">ถึงวันที่</label>
-                <input type="date" id="filter-date-end" class="mt-1 block w-full border rounded-md p-2">
-            </div>
-            <div>
-                <label class="block text-sm font-bold text-gray-700">เครื่องจักร</label>
-                <select id="filter-machine" class="mt-1 block w-full border rounded-md p-2"><option value="all">ทั้งหมด</option></select>
-            </div>
-            <div>
-                <label class="block text-sm font-bold text-gray-700">กะ</label>
-                <select id="filter-shift" class="mt-1 block w-full border rounded-md p-2"><option value="all">ทั้งหมด</option></select>
+<body class="bg-gray-100 min-h-screen p-4 md:p-8">
+    
+    <!-- Navigation Bar สลับหน้า -->
+    <div class="max-w-7xl mx-auto mb-8 bg-white p-2 rounded-2xl shadow-sm border border-gray-200 flex justify-center space-x-4">
+        <button onclick="switchTab('ncp')" id="tab-btn-ncp" class="px-8 py-3 rounded-xl font-semibold bg-blue-600 text-white transition-all shadow-sm">วิเคราะห์ NCP</button>
+        <button onclick="switchTab('waste')" id="tab-btn-waste" class="px-8 py-3 rounded-xl font-semibold text-gray-600 hover:bg-gray-100 transition-all">วิเคราะห์ Waste</button>
+    </div>
+
+    <!-- ส่วนเนื้อหา: หน้าวิเคราะห์ NCP -->
+    <div id="content-ncp" class="max-w-7xl mx-auto tab-content">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 mb-8">
+            <h1 class="text-2xl font-bold mb-6 text-gray-800">สรุปการวิเคราะห์ NCP แยกรายบุคคล</h1>
+            
+            <!-- ตัวกรองข้อมูล -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">จากวันที่</label>
+                    <input type="date" id="filter-date-start" class="mt-1 block w-full border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">ถึงวันที่</label>
+                    <input type="date" id="filter-date-end" class="mt-1 block w-full border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">เครื่องจักร</label>
+                    <select id="filter-machine" class="mt-1 block w-full border border-gray-300 rounded-xl p-2.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="all">ทั้งหมด</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">กะ</label>
+                    <select id="filter-shift" class="mt-1 block w-full border border-gray-300 rounded-xl p-2.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="all">ทั้งหมด</option>
+                    </select>
+                </div>
             </div>
         </div>
 
-        <!-- ส่วนแสดงกราฟเส้น พร้อมปุ่มสลับมุมมอง Daily / Weekly / Monthly -->
+        <!-- กราฟแนวโน้ม -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 mb-8">
             <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                 <h2 class="text-xl font-bold text-gray-800">📈 แนวโน้มจำนวนครั้งที่เกิน 2 พาเลทรายบุคคล</h2>
-                <!-- ปุ่มสลับมุมมองสไตล์โมเดิร์น -->
                 <div class="flex bg-gray-100 p-1 rounded-xl shadow-inner">
                     <button onclick="setChartView('daily')" id="btn-daily" class="px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 bg-indigo-600 text-white shadow-sm">Daily</button>
                     <button onclick="setChartView('weekly')" id="btn-weekly" class="px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 text-gray-600 hover:text-gray-900">Weekly</button>
@@ -53,56 +76,130 @@
         <div id="blocks-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
     </div>
 
-    <script>
-        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSJLOKv2HXPLKnHoo3hc57LkyR4UIMbSsxQQb6BrCnqJplzbtJKc6Hhj7vx8_hYABvBMN4i8zNvcY0A/pub?gid=0&single=true&output=csv';
-        let rawData = [];
-        let chartInstance = null;
-        let currentViewMode = 'daily'; // ค่าเริ่มต้นเป็นแบบรายวัน
+    <!-- ส่วนเนื้อหา: หน้าวิเคราะห์ Waste -->
+    <div id="content-waste" class="max-w-7xl mx-auto tab-content hidden">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 mb-8">
+            <h1 class="text-2xl font-bold mb-6 text-gray-800">📊 Dashboard วิเคราะห์ข้อมูล Waste</h1>
+            
+            <!-- ตัวกรอง Waste -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">วันที่</label>
+                    <input type="date" id="w-filter-date" class="mt-1 block w-full border border-gray-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" onchange="renderWaste()">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">เครื่องจักร</label>
+                    <select id="w-filter-machine" class="mt-1 block w-full border border-gray-300 rounded-xl p-2.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none" onchange="renderWaste()">
+                        <option value="all">ทั้งหมด</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">กะ</label>
+                    <select id="w-filter-shift" class="mt-1 block w-full border border-gray-300 rounded-xl p-2.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none" onchange="renderWaste()">
+                        <option value="all">ทั้งหมด</option>
+                    </select>
+                </div>
+            </div>
+        </div>
 
-        // ดัชนีคอลัมน์: Name(AI)=34, AM=38, Problem(U)=20, Total(I)=8, NCP(P)=15, PDR(C)=2, Date(AB)=27, Machine(G)=6, Shift(B)=1
+        <!-- สรุปตัวเลขรวม -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="bg-gradient-to-br from-blue-600 to-blue-700 text-white p-6 rounded-2xl shadow-md">
+                <h3 class="text-sm font-medium opacity-90 uppercase tracking-wider">น้ำหนักรวม (คอลัมน์ E)</h3>
+                <p id="total-e" class="text-4xl font-bold mt-2">0</p>
+            </div>
+            <div class="bg-gradient-to-br from-emerald-600 to-emerald-700 text-white p-6 rounded-2xl shadow-md">
+                <h3 class="text-sm font-medium opacity-90 uppercase tracking-wider">น้ำหนัก Consumption (คอลัมน์ F)</h3>
+                <p id="total-f" class="text-4xl font-bold mt-2">0</p>
+            </div>
+        </div>
+
+        <!-- ตาราง Waste -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-semibold tracking-wider">
+                        <tr>
+                            <th class="p-4">วันที่</th>
+                            <th class="p-4">เครื่อง</th>
+                            <th class="p-4">กะ</th>
+                            <th class="p-4">น้ำหนัก E</th>
+                            <th class="p-4">น้ำหนัก F</th>
+                            <th class="p-4">% (E / F)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="waste-table-body" class="divide-y divide-gray-100 text-sm text-gray-700"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const NCP_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSJLOKv2HXPLKnHoo3hc57LkyR4UIMbSsxQQb6BrCnqJplzbtJKc6Hhj7vx8_hYABvBMN4i8zNvcY0A/pub?gid=0&single=true&output=csv';
+        const WASTE_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSJLOKv2HXPLKnHoo3hc57LkyR4UIMbSsxQQb6BrCnqJplzbtJKc6Hhj7vx8_hYABvBMN4i8zNvcY0A/pub?gid=1361864594&single=true&output=csv';
+
+        let ncpData = [];
+        let wasteData = [];
+        let chartInstance = null;
+        let currentViewMode = 'daily';
+
+        // Index คอลัมน์ NCP: Name(AI)=34, AM=38, Problem(U)=20, Total(I)=8, NCP(P)=15, PDR(C)=2, Date(AB)=27, Machine(G)=6, Shift(B)=1
         const NAME_IDX = 34, AM_IDX = 38, PROB_IDX = 20, TOTAL_IDX = 8, NCP_IDX = 15, PDR_IDX = 2, DATE_IDX = 27, MACHINE_IDX = 6, SHIFT_IDX = 1;
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('content-' + tabId).classList.remove('hidden');
+
+            document.getElementById('tab-btn-ncp').className = tabId === 'ncp' ? "px-8 py-3 rounded-xl font-semibold bg-blue-600 text-white transition-all shadow-sm" : "px-8 py-3 rounded-xl font-semibold text-gray-600 hover:bg-gray-100 transition-all";
+            document.getElementById('tab-btn-waste').className = tabId === 'waste' ? "px-8 py-3 rounded-xl font-semibold bg-blue-600 text-white transition-all shadow-sm" : "px-8 py-3 rounded-xl font-semibold text-gray-600 hover:bg-gray-100 transition-all";
+        }
 
         async function init() {
             try {
-                const response = await fetch(sheetUrl);
-                const csvText = await response.text();
-                Papa.parse(csvText, {
-                    header: false, skipEmptyLines: true,
+                // โหลดข้อมูล NCP
+                Papa.parse(NCP_CSV, {
+                    download: true, header: false, skipEmptyLines: true,
                     complete: (res) => {
-                        rawData = res.data.slice(1);
-                        initFilters();
-                        renderDashboard();
+                        ncpData = res.data.slice(1);
+                        initNCPFilters();
+                        renderNCPDashboard();
+                    }
+                });
+
+                // โหลดข้อมูล Waste
+                Papa.parse(WASTE_CSV, {
+                    download: true, header: false, skipEmptyLines: true,
+                    complete: (res) => {
+                        wasteData = res.data.slice(1);
+                        initWasteFilters();
+                        renderWaste();
                     }
                 });
             } catch (err) {
-                console.error("ไม่สามารถโหลดข้อมูลได้", err);
+                console.error("Error loading data", err);
             }
         }
 
-        function initFilters() {
-            const machines = [...new Set(rawData.map(r => r[MACHINE_IDX]))].filter(x => x).sort();
-            const shifts = [...new Set(rawData.map(r => r[SHIFT_IDX]))].filter(x => x).sort();
-            machines.forEach(m => document.getElementById('filter-machine').innerHTML += `<option value="${m}">${m}</option>`);
-            shifts.forEach(s => document.getElementById('filter-shift').innerHTML += `<option value="${s}">${s}</option>`);
-        }
-
-        function toggleDetails(id) {
-            const el = document.getElementById(id);
-            el.style.display = (el.style.display === "none") ? "block" : "none";
+        /* --- NCP Logic --- */
+        function initNCPFilters() {
+            const machines = [...new Set(ncpData.map(r => r[MACHINE_IDX]))].filter(x => x).sort();
+            const shifts = [...new Set(ncpData.map(r => r[SHIFT_IDX]))].filter(x => x).sort();
+            const machSelect = document.getElementById('filter-machine');
+            const shiftSelect = document.getElementById('filter-shift');
+            
+            machines.forEach(m => machSelect.innerHTML += `<option value="${m}">${m}</option>`);
+            shifts.forEach(s => shiftSelect.innerHTML += `<option value="${s}">${s}</option>`);
         }
 
         function parseDateToStandard(dateStr) {
             if (!dateStr) return '';
             dateStr = dateStr.trim();
             if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-            
             const parts = dateStr.split(/[\/\-]/);
             if (parts.length === 3) {
                 let d = parts[0], m = parts[1], y = parts[2];
                 if (y.length === 2) y = '20' + y;
-                if (y.length === 4 && m.length <= 2 && d.length <= 2) {
-                    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
-                }
+                if (y.length === 4) return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
             }
             const parsed = new Date(dateStr);
             if (!isNaN(parsed.getTime())) {
@@ -114,23 +211,13 @@
             return dateStr;
         }
 
-        function cleanPercent(valStr) {
-            if (!valStr) return NaN;
-            const cleaned = String(valStr).replace(/%/g, '').trim();
-            return parseFloat(cleaned);
-        }
-
         function setChartView(mode) {
             currentViewMode = mode;
             ['daily', 'weekly', 'monthly'].forEach(m => {
                 const btn = document.getElementById(`btn-${m}`);
-                if (m === mode) {
-                    btn.className = "px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 bg-indigo-600 text-white shadow-sm";
-                } else {
-                    btn.className = "px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 text-gray-600 hover:text-gray-900";
-                }
+                btn.className = m === mode ? "px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 bg-indigo-600 text-white shadow-sm" : "px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 text-gray-600 hover:text-gray-900";
             });
-            renderDashboard();
+            renderNCPDashboard();
         }
 
         function getWeekNumber(d) {
@@ -141,7 +228,12 @@
             return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
         }
 
-        function renderDashboard() {
+        function toggleDetails(id) {
+            const el = document.getElementById(id);
+            el.style.display = (el.style.display === "none") ? "block" : "none";
+        }
+
+        function renderNCPDashboard() {
             const container = document.getElementById('blocks-container');
             container.innerHTML = '';
             
@@ -150,7 +242,7 @@
             const fMach = document.getElementById('filter-machine').value;
             const fShift = document.getElementById('filter-shift').value;
 
-            const filtered = rawData.filter(r => {
+            const filtered = ncpData.filter(r => {
                 const rowDate = parseDateToStandard(r[DATE_IDX]);
                 const matchDate = (!fStart || rowDate >= fStart) && (!fEnd || rowDate <= fEnd);
                 const matchMach = (fMach === 'all' || r[MACHINE_IDX] === fMach);
@@ -168,7 +260,6 @@
                 return acc;
             }, {});
 
-            // เตรียมข้อมูลสำหรับกราฟเส้น
             let timeLabelsSet = new Set();
             filtered.forEach(row => {
                 const val = parseFloat(row[AM_IDX]);
@@ -186,8 +277,6 @@
             });
 
             const chartLabels = Array.from(timeLabelsSet).sort();
-            
-            // รวบรวมรายชื่อบุคคลทั้งหมดที่ผ่านการกรองและมีค่า > 50%
             const personNames = Object.keys(grouped).filter(name => grouped[name].over.length > 0);
             
             const colorPalette = [
@@ -219,7 +308,7 @@
                     data: dataCounts,
                     borderColor: color,
                     backgroundColor: color,
-                    borderWidth: 2,
+                    borderWidth: 2.5,
                     pointRadius: 4,
                     tension: 0.2
                 };
@@ -228,29 +317,38 @@
             Object.entries(grouped).forEach(([name, g], index) => {
                 const idOver = `o-${index}`, idUnder = `u-${index}`;
                 const block = document.createElement('div');
-                block.className = "bg-white p-6 rounded-2xl shadow-md border border-gray-200 flex flex-col justify-between";
+                block.className = "bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex flex-col justify-between hover:shadow-md transition-all";
                 
                 const renderItems = (list) => list.map(r => {
-                    return `<li class="border-b pb-1 mb-1 border-gray-100">
-                        • <b>PDR:</b> ${r[PDR_IDX] || '-'} | <b>เครื่องจักร:</b> ${r[MACHINE_IDX] || '-'}<br>
-                        <b>ปัญหา:</b> ${r[PROB_IDX] || '-'}<br>
-                        <span class="text-gray-500 text-[11px]">ผลิต: ${r[TOTAL_IDX] || 0} | NCP: ${r[NCP_IDX] || 0} | <b>ค่า: ${r[AM_IDX] || 0} พาเลท</b></span>
+                    const totalVal = parseFloat(r[TOTAL_IDX]) || 0;
+                    const ncpVal = parseFloat(r[NCP_IDX]) || 0;
+                    const pct = totalVal > 0 ? ((ncpVal / totalVal) * 100).toFixed(1) : 0;
+                    return `<li class="border-b pb-2 mb-2 border-gray-100 last:border-0">
+                        • <strong class="text-gray-700">PDR:</strong> ${r[PDR_IDX] || '-'} | <strong class="text-gray-700">เครื่องจักร:</strong> ${r[MACHINE_IDX] || '-'}<br>
+                        <strong class="text-gray-700">ปัญหา:</strong> ${r[PROB_IDX] || '-'}<br>
+                        <span class="text-gray-500 text-xs">ผลิต: ${totalVal} | NCP: ${ncpVal} (${pct}%) | <strong class="text-gray-800">AM: ${r[AM_IDX] || 0}</strong></span>
                     </li>`;
                 }).join('');
 
                 block.innerHTML = `
                     <div>
                         <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">${name}</h2>
-                        <div class="mb-4">
-                            <button onclick="toggleDetails('${idOver}')" class="text-red-600 font-bold w-full text-left bg-red-50 p-2 rounded hover:bg-red-100 transition">⚠️ เกิน 2 พาเลท: ${g.over.length} รายการ</button>
-                            <ul id="${idOver}" style="display:none" class="text-xs text-gray-600 mt-2 space-y-2 bg-red-50 p-3 rounded max-h-48 overflow-y-auto">
-                                ${g.over.length > 0 ? renderItems(g.over) : '<li>ไม่มีข้อมูล</li>'}
+                        <div class="mb-3">
+                            <button onclick="toggleDetails('${idOver}')" class="text-red-700 font-semibold w-full text-left bg-red-50 p-3 rounded-xl hover:bg-red-100 transition flex justify-between items-center text-sm">
+                                <span>⚠️ เกิน 2 พาเลท: ${g.over.length} รายการ</span>
+                                <span class="text-xs">▼</span>
+                            </button>
+                            <ul id="${idOver}" style="display:none" class="text-xs text-gray-600 mt-2 space-y-2 bg-red-50/50 p-3 rounded-xl max-h-48 overflow-y-auto">
+                                ${g.over.length > 0 ? renderItems(g.over) : '<li class="text-gray-400">ไม่มีข้อมูล</li>'}
                             </ul>
                         </div>
                         <div>
-                            <button onclick="toggleDetails('${idUnder}')" class="text-green-600 font-bold w-full text-left bg-green-50 p-2 rounded hover:bg-green-100 transition">✅ ปกติ: ${g.under.length} รายการ</button>
-                            <ul id="${idUnder}" style="display:none" class="text-xs text-gray-600 mt-2 space-y-2 bg-green-50 p-3 rounded max-h-48 overflow-y-auto">
-                                ${g.under.length > 0 ? renderItems(g.under) : '<li>ไม่มีข้อมูล</li>'}
+                            <button onclick="toggleDetails('${idUnder}')" class="text-green-700 font-semibold w-full text-left bg-green-50 p-3 rounded-xl hover:bg-green-100 transition flex justify-between items-center text-sm">
+                                <span>✅ ปกติ: ${g.under.length} รายการ</span>
+                                <span class="text-xs">▼</span>
+                            </button>
+                            <ul id="${idUnder}" style="display:none" class="text-xs text-gray-600 mt-2 space-y-2 bg-green-50/50 p-3 rounded-xl max-h-48 overflow-y-auto">
+                                ${g.under.length > 0 ? renderItems(g.under) : '<li class="text-gray-400">ไม่มีข้อมูล</li>'}
                             </ul>
                         </div>
                     </div>
@@ -263,38 +361,33 @@
 
         function updateChart(labels, datasets) {
             const ctx = document.getElementById('overChart').getContext('2d');
-            if (chartInstance) {
-                chartInstance.destroy();
-            }
+            if (chartInstance) chartInstance.destroy();
             
             Chart.register(ChartDataLabels);
 
             chartInstance = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: datasets
-                },
+                data: { labels: labels, datasets: datasets },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
                         y: {
                             beginAtZero: true,
-                            ticks: { stepSize: 1 },
+                            ticks: { stepSize: 1, font: { family: 'Prompt' } },
                             grace: '20%'
+                        },
+                        x: {
+                            ticks: { font: { family: 'Prompt' } }
                         }
                     },
                     plugins: {
-                        legend: { position: 'top' },
+                        legend: { position: 'top', labels: { font: { family: 'Prompt', weight: 500 } } },
                         datalabels: {
                             align: 'top',
                             anchor: 'end',
-                            color: '#1f2937',
-                            font: {
-                                weight: 'bold',
-                                size: 10
-                            },
+                            color: '#374151',
+                            font: { family: 'Prompt', weight: 'bold', size: 10 },
                             formatter: (value) => value > 0 ? value : ''
                         }
                     }
@@ -302,10 +395,66 @@
             });
         }
 
+        /* --- Waste Logic --- */
+        function initWasteFilters() {
+            const machines = [...new Set(wasteData.map(r => r[3]))].filter(x => x).sort();
+            const shifts = [...new Set(wasteData.map(r => r[2]))].filter(x => x).sort();
+            const machSelect = document.getElementById('w-filter-machine');
+            const shiftSelect = document.getElementById('w-filter-shift');
+
+            machines.forEach(m => machSelect.innerHTML += `<option value="${m}">${m}</option>`);
+            shifts.forEach(s => shiftSelect.innerHTML += `<option value="${s}">${s}</option>`);
+        }
+
+        function renderWaste() {
+            const fDate = document.getElementById('w-filter-date').value;
+            const fMach = document.getElementById('w-filter-machine').value;
+            const fShift = document.getElementById('w-filter-shift').value;
+
+            let totalE = 0, totalF = 0;
+            const tbody = document.getElementById('waste-table-body');
+            tbody.innerHTML = '';
+
+            wasteData.forEach(row => {
+                // Mapping Sheet Waste: วันที่=A(0), กะ=C(2), เครื่อง=D(3), นน.E=E(4), นน.F=F(5)
+                const rowDate = row[0] ? row[0].trim() : '';
+                const rowShift = row[2] ? row[2].trim() : '';
+                const rowMach = row[3] ? row[3].trim() : '';
+
+                if ((fDate === '' || rowDate === fDate) && 
+                    (fMach === 'all' || rowMach === fMach) && 
+                    (fShift === 'all' || rowShift === fShift)) {
+                    
+                    const valE = parseFloat(row[4] || 0);
+                    const valF = parseFloat(row[5] || 0);
+                    totalE += valE;
+                    totalF += valF;
+
+                    const pctEF = valF > 0 ? ((valE / valF) * 100).toFixed(2) : '0.00';
+
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="p-4">${rowDate || '-'}</td>
+                            <td class="p-4 font-medium text-gray-800">${rowMach || '-'}</td>
+                            <td class="p-4">${rowShift || '-'}</td>
+                            <td class="p-4 font-semibold text-blue-600">${valE.toFixed(2)}</td>
+                            <td class="p-4 font-semibold text-emerald-600">${valF.toFixed(2)}</td>
+                            <td class="p-4 font-bold text-indigo-600">${pctEF}%</td>
+                        </tr>
+                    `;
+                }
+            });
+
+            document.getElementById('total-e').innerText = totalE.toFixed(2);
+            document.getElementById('total-f').innerText = totalF.toFixed(2);
+        }
+
+        // Event Listeners สำหรับตัวกรอง NCP
         ['filter-date-start', 'filter-date-end', 'filter-machine', 'filter-shift'].forEach(id => {
-            document.getElementById(id).addEventListener('change', renderDashboard);
+            document.getElementById(id).addEventListener('change', renderNCPDashboard);
         });
 
+        // เริ่มต้นการทำงานทั้งหมด
         init();
     </script>
 </body>
