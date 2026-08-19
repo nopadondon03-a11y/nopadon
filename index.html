@@ -347,7 +347,7 @@
                     <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
                         <span>📝</span> สรุปผลการดำเนินงานและแนวทางการแก้ไข (CAPA & AI Insights)
                     </h2>
-                    <p class="text-xs text-slate-500 mt-0.5">ภาพรวมการวิเคราะห์ข้อมูล รายชื่อผู้ที่เกินเป้าหมาย และกะที่ Waste เกินมาตรฐาน</p>
+                    <p class="text-xs text-slate-500 mt-0.5">ภาพรวมการวิเคราะห์ข้อมูลจากตัวกรองปัจจุบัน รายชื่อผู้ที่เกินเป้าหมาย กะที่ Waste เกินมาตรฐาน และปัญหาม้วน</p>
                 </div>
                 <button onclick="exportSummaryReport()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-xl transition-all shadow-sm flex items-center gap-2">
                     <span>📥</span> ส่งออกรายงานสรุป
@@ -357,7 +357,7 @@
             <div class="space-y-6">
                 <div class="bg-gradient-to-br from-indigo-50/90 to-blue-50/70 border border-indigo-200/80 p-5 rounded-2xl shadow-sm">
                     <h3 class="font-bold text-indigo-900 text-sm mb-3 flex items-center gap-2">
-                        <span>🤖</span> การวิเคราะห์อัจฉริยะ (AI Insights Evaluation)
+                        <span>🤖</span> การวิเคราะห์อัจฉริยะแบบ Real-time (AI Insights Evaluation)
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="bg-white/80 p-4 rounded-xl border border-emerald-200/80 shadow-xs">
@@ -381,9 +381,9 @@
 
                 <div class="bg-slate-50 border border-slate-200/80 p-5 rounded-2xl">
                     <h3 class="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2 text-indigo-700">
-                        <span>👥</span> 1. สรุปรายบุคคลที่ทำเกินเป้าหมาย (NCP เกิน 2 พาเลท)
+                        <span>👥</span> 1. สรุปรายบุคคลที่ทำเกินเป้าหมาย (NCP เกิน 2 พาเลท) ตามข้อมูลปัจจุบัน
                     </h3>
-                    <p class="text-xs text-slate-500 mb-4">รายชื่อบุคลากรที่มีความถี่ในการเกิดพาเลทเกินมาตรฐาน พร้อมสถิติและเครื่องจักรที่พบปัญหาบ่อย</p>
+                    <p class="text-xs text-slate-500 mb-4">รายชื่อบุคลากรที่มีความถี่ในการเกิดพาเลทเกินมาตรฐานจากข้อมูลที่กรอง</p>
                     <div id="summary-ncp-over-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
                 </div>
 
@@ -391,7 +391,7 @@
                     <h3 class="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2 text-indigo-700">
                         <span>🗑️</span> 2. สรุปกะที่ทำ Waste เกินเป้าหมาย (>2.00%) และกะที่ได้เป้า (≤2.00%) แยกตามเครื่องจักร
                     </h3>
-                    <p class="text-xs text-slate-500 mb-4">จำแนกผลการดำเนินงานของเสียตามเครื่องจักรและกะการทำงาน</p>
+                    <p class="text-xs text-slate-500 mb-4">จำแนกผลการดำเนินงานของเสียตามเครื่องจักรและกะการทำงานจากข้อมูลปัจจุบัน</p>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="bg-red-50/60 border border-red-200 p-4 rounded-xl">
                             <h4 class="font-bold text-red-800 text-xs mb-3 flex items-center gap-1.5">
@@ -410,7 +410,15 @@
 
                 <div class="bg-slate-50 border border-slate-200/80 p-5 rounded-2xl">
                     <h3 class="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2 text-indigo-700">
-                        <span>🛠️</span> 3. แนวทางการแก้ไขและมาตรการป้องกัน (CAPA)
+                        <span>🏷️</span> 3. สรุปปัญหาม้วน (Roll Issues) และสถิติการหยุดเครื่องตามหน่วยงานปัจจุบัน
+                    </h3>
+                    <p class="text-xs text-slate-500 mb-4">วิเคราะห์ปัญหาจากม้วนวัตถุดิบแยกตามกะ หน่วยงาน และสถานะการหยุดเครื่อง</p>
+                    <div id="summary-roll-issues-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200/80 p-5 rounded-2xl">
+                    <h3 class="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2 text-indigo-700">
+                        <span>🛠️</span> 4. แนวทางการแก้ไขและมาตรการป้องกัน (CAPA)
                     </h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse text-xs">
@@ -434,6 +442,12 @@
                                     <td class="p-3 text-slate-600">ตรวจสอบและสอบเทียบเซนเซอร์การป้อนแผ่นและอุณหภูมิของเครื่องจักรที่มีอัตราเสียสูง</td>
                                     <td class="p-3 text-slate-600">ทำ Preventive Maintenance (PM) เชิงรุกและตั้งระบบแจ้งเตือนแบบ Real-time</td>
                                     <td class="p-3 text-center text-indigo-600 font-semibold">Maintenance & QA Team</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 font-medium text-slate-800">ปัญหาม้วนและการหยุดเครื่องจักร (Roll Issues)</td>
+                                    <td class="p-3 text-slate-600">ตรวจสอบคุณภาพม้วนกระดาษก่อนรับเข้ากระบวนการและประสานงาน Supplier ทันทีเมื่อพบความผิดปกติ</td>
+                                    <td class="p-3 text-slate-600">จัดทำเกณฑ์การตรวจรับวัตถุดิบ (Inspection Criteria) และทบทวน Supplier ร่วมกับฝ่ายจัดซื้อ</td>
+                                    <td class="p-3 text-center text-indigo-600 font-semibold">QA & Procurement Team</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -573,8 +587,8 @@
                             ncpMachine: (r[6] || '').trim(),
                             ncpOutput: (r[8] || '').trim(),
                             ncpLoss: (r[15] || '').trim(),
-                            ncpDescE: (r[4] || '').trim(), // Column E: Description
-                            ncpStopL: (r[11] || '').trim(), // Column L: Stoppage Count
+                            ncpDescE: (r[4] || '').trim(), 
+                            ncpStopL: (r[11] || '').trim(), 
                             ncpProblemU: (r[20] || '').trim(),
                             ncpWeightY: parseFloat(String(r[24] || '').replace(/,/g, '')) || 0,
                             ncpDate: normalizeDateStr(r[27] || r[28] || r[0] || ''),
@@ -610,14 +624,14 @@
                                     parsedRowsAdditional = aData.slice(1).map(r => {
                                         return {
                                             dateVal: normalizeDateStr(r[0] || ''),
-                                            supplierD: String(r[3] || '').trim(), // Column D
-                                            gradeE: String(r[4] || '').trim(),    // Column E
-                                            deptK: String(r[10] || '').trim(),    // Column K
-                                            issueI: String(r[8] || '').trim(),    // Column I
-                                            stopU: String(r[20] || r[21] || r[19] || '').trim(), // Column U
-                                            shiftP: String(r[15] || '').trim(),   // Column P
+                                            supplierD: String(r[3] || '').trim(), 
+                                            gradeE: String(r[4] || '').trim(),    
+                                            deptK: String(r[10] || '').trim(),    
+                                            issueI: String(r[8] || '').trim(),    
+                                            stopU: String(r[20] || r[21] || r[19] || '').trim(), 
+                                            shiftP: String(r[15] || '').trim(),   
                                             countS: parseFloat(String(r[18] || '0').replace(/,/g, '')) || 1,
-                                            machineT: String(r[19] || '').trim()  // Column T
+                                            machineT: String(r[19] || '').trim()  
                                         };
                                     }).filter(r => r.dateVal || r.issueI || r.machineT);
 
@@ -825,6 +839,8 @@
                 let totalOutput = pRows.reduce((sum, r) => sum + (parseFloat(r.ncpOutput) || 0), 0);
                 let totalLoss = pRows.reduce((sum, r) => sum + (parseFloat(r.ncpLoss) || 0), 0);
 
+                let machineList = [...new Set(pRows.map(r => r.ncpMachine).filter(Boolean))].join(', ');
+
                 let problemMap = {};
                 pRows.forEach(r => {
                     let prob = (r.ncpProblemU || '').trim();
@@ -854,10 +870,13 @@
                 card.innerHTML = `
                     <div>
                         <div class="flex justify-between items-start mb-3">
-                            <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
-                                <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm font-semibold">👤</span>
-                                ${person}
-                            </h3>
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                                    <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm font-semibold">👤</span>
+                                    ${person}
+                                </h3>
+                                ${machineList ? `<p class="text-xs text-indigo-600 font-medium mt-1 ml-10">เครื่องจักร: ${machineList}</p>` : ''}
+                            </div>
                             <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg font-medium">${pRows.length} รายการ</span>
                         </div>
                         
@@ -978,13 +997,11 @@
             const container = document.getElementById('add-shift-cards-container');
             container.innerHTML = '';
             
-            // Group by Shift and Department
             let groups = {};
             data.forEach(r => {
                 let shift = r.shiftP ? r.shiftP.trim() : '';
                 let dept = r.deptK ? r.deptK.trim() : 'ไม่ระบุหน่วยงาน';
                 
-                // Exclude empty, unspecified, or '-' shifts
                 if (!shift || shift === 'ไม่ระบุ' || shift === '-' || shift.toLowerCase() === 'nan') return;
 
                 let key = `${shift}___${dept}`;
@@ -1106,8 +1123,8 @@
             headerTr.innerHTML = `
                 <th class="p-3 font-semibold">วันที่</th>
                 <th class="p-3 font-semibold">หน่วยงาน</th>
-                <th class="p-3 font-semibold">Supplier (Col D)</th>
-                <th class="p-3 font-semibold">เกรดแกรม (Col E)</th>
+                <th class="p-3 font-semibold">Supplier</th>
+                <th class="p-3 font-semibold">เกรดแกรม</th>
                 <th class="p-3 font-semibold">เครื่องจักร</th>
                 <th class="p-3 font-semibold">กะ</th>
                 <th class="p-3 font-semibold">ปัญหาที่พบ (ม้วน)</th>
@@ -1157,8 +1174,8 @@
             headerTr.innerHTML = `
                 <th class="p-3 font-semibold">วันที่</th>
                 <th class="p-3 font-semibold">หน่วยงาน</th>
-                <th class="p-3 font-semibold">Supplier (Col D)</th>
-                <th class="p-3 font-semibold">เกรดแกรม (Col E)</th>
+                <th class="p-3 font-semibold">Supplier</th>
+                <th class="p-3 font-semibold">เกรดแกรม</th>
                 <th class="p-3 font-semibold">เครื่องจักร</th>
                 <th class="p-3 font-semibold">กะ</th>
                 <th class="p-3 font-semibold">ปัญหาที่พบ (ม้วน)</th>
@@ -1211,8 +1228,8 @@
                 <th class="p-3 font-semibold">เครื่องจักร</th>
                 <th class="p-3 font-semibold">กะ</th>
                 <th class="p-3 font-semibold text-center">PDR</th>
-                <th class="p-3 font-semibold">Description (Col E)</th>
-                <th class="p-3 font-semibold text-center">จำนวนหยุดเครื่อง (Col L)</th>
+                <th class="p-3 font-semibold">Description</th>
+                <th class="p-3 font-semibold text-center">จำนวนหยุดเครื่อง</th>
                 <th class="p-3 font-semibold text-right">จำนวนผลิต</th>
                 <th class="p-3 font-semibold text-right">ของเสียแผ่น</th>
                 <th class="p-3 font-semibold text-center">พาเลทเกิน</th>
@@ -1321,16 +1338,19 @@
                 let shiftPercentNum = shiftF > 0 ? (shiftE / shiftF) * 100 : 0;
                 let shiftPercent = shiftPercentNum.toFixed(2);
                 let isAbnormal = shiftPercentNum > 2.00;
+                let machineList = [...new Set(sRows.map(r => r.wasteMachine).filter(Boolean))].join(', ');
 
                 let card = document.createElement('div');
                 card.className = 'bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 hover:shadow-md transition-all flex flex-col justify-between';
                 card.innerHTML = `
                     <div>
                         <div class="flex justify-between items-start mb-3">
-                            <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
-                                <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm font-semibold">กะ</span>
-                                กะ ${shift}
-                            </h3>
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                                    <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm font-semibold">กะ</span>
+                                    กะ ${shift} ${machineList ? `(${machineList})` : ''}
+                                </h3>
+                            </div>
                             <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg font-medium">${sRows.length} รายการ</span>
                         </div>
                         
@@ -1433,11 +1453,11 @@
             const ncpOverContainer = document.getElementById('summary-ncp-over-container');
             ncpOverContainer.innerHTML = '';
             
-            let persons = [...new Set(parsedRowsNCP.map(r => r.ncpName).filter(Boolean))];
+            let persons = [...new Set(currentFilteredNCP.map(r => r.ncpName).filter(Boolean))];
             let overTargetPersons = [];
 
             persons.forEach(person => {
-                let pRows = parsedRowsNCP.filter(r => r.ncpName === person);
+                let pRows = currentFilteredNCP.filter(r => r.ncpName === person);
                 let overRows = pRows.filter(r => r.ncpOver > 2);
                 if (overRows.length > 0) {
                     overTargetPersons.push({ person, total: pRows.length, over: overRows.length });
@@ -1447,7 +1467,7 @@
             overTargetPersons.sort((a, b) => b.over - a.over);
 
             if (overTargetPersons.length === 0) {
-                ncpOverContainer.innerHTML = `<div class="col-span-full p-4 text-center text-slate-400 text-xs bg-white rounded-xl border border-slate-200">ไม่พบข้อมูลบุคลากรที่เกินเป้าหมายในช่วงเวลานี้</div>`;
+                ncpOverContainer.innerHTML = `<div class="col-span-full p-4 text-center text-slate-400 text-xs bg-white rounded-xl border border-slate-200">ไม่พบข้อมูลบุคลากรที่เกินเป้าหมายตามช่วงเวลาหรือตัวกรองปัจจุบัน</div>`;
             } else {
                 overTargetPersons.forEach(item => {
                     let div = document.createElement('div');
@@ -1474,12 +1494,12 @@
             abnormalContainer.innerHTML = '';
             normalContainer.innerHTML = '';
 
-            let machines = [...new Set(parsedRowsWaste.map(r => r.wasteMachine).filter(Boolean))].sort();
+            let machines = [...new Set(currentFilteredWaste.map(r => r.wasteMachine).filter(Boolean))].sort();
             let abnormalCount = 0;
             let normalCount = 0;
 
             machines.forEach(machine => {
-                let mRows = parsedRowsWaste.filter(r => r.wasteMachine === machine);
+                let mRows = currentFilteredWaste.filter(r => r.wasteMachine === machine);
                 let shifts = [...new Set(mRows.map(r => r.wasteShift).filter(Boolean))].sort();
 
                 shifts.forEach(shift => {
@@ -1511,13 +1531,64 @@
                 });
             });
 
-            if (abnormalCount === 0) abnormalContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">ไม่มีกะที่ทำ Waste เกินเป้าหมาย</p>`;
-            if (normalCount === 0) normalContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">ไม่มีกะที่ทำ Waste ได้ตามเป้าหมาย</p>`;
+            if (abnormalCount === 0) abnormalContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">ไม่มีกะที่ทำ Waste เกินเป้าหมายตามตัวกรองปัจจุบัน</p>`;
+            if (normalCount === 0) normalContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">ไม่มีกะที่ทำ Waste ได้ตามเป้าหมายตามตัวกรองปัจจุบัน</p>`;
 
-            updateAIInsights(overTargetPersons, abnormalCount, normalCount);
+            const rollContainer = document.getElementById('summary-roll-issues-container');
+            rollContainer.innerHTML = '';
+            
+            let addGroups = {};
+            currentFilteredAdditional.forEach(r => {
+                let shift = r.shiftP ? r.shiftP.trim() : '';
+                let dept = r.deptK ? r.deptK.trim() : 'ไม่ระบุหน่วยงาน';
+                if (!shift || shift === 'ไม่ระบุ' || shift === '-' || shift.toLowerCase() === 'nan') return;
+
+                let key = `${shift}___${dept}`;
+                if (!addGroups[key]) {
+                    addGroups[key] = { shift, dept, total: 0, stop: 0, nonStop: 0 };
+                }
+                addGroups[key].total += r.countS;
+                if (isStoppageRecord(r.stopU)) {
+                    addGroups[key].stop += r.countS;
+                } else {
+                    addGroups[key].nonStop += r.countS;
+                }
+            });
+
+            let rollKeys = Object.keys(addGroups).sort();
+            if (rollKeys.length === 0) {
+                rollContainer.innerHTML = `<div class="col-span-full p-4 text-center text-slate-400 text-xs bg-white rounded-xl border border-slate-200">ไม่พบข้อมูลปัญหาม้วนตามช่วงเวลาหรือตัวกรองปัจจุบัน</div>`;
+            } else {
+                rollKeys.forEach(k => {
+                    let g = addGroups[k];
+                    let div = document.createElement('div');
+                    div.className = 'bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between';
+                    div.innerHTML = `
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="font-bold text-slate-800 text-sm">กะ ${g.shift} | หน่วยงาน ${g.dept}</span>
+                                <span class="text-xs bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full font-semibold">${g.total} ครั้ง</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 mt-2 text-xs">
+                                <div class="bg-red-50 p-2 rounded-lg text-red-800">
+                                    <p class="font-semibold">หยุดเครื่อง</p>
+                                    <p class="font-bold text-sm">${g.stop} ครั้ง</p>
+                                </div>
+                                <div class="bg-emerald-50 p-2 rounded-lg text-emerald-800">
+                                    <p class="font-semibold">ไม่หยุดเครื่อง</p>
+                                    <p class="font-bold text-sm">${g.nonStop} ครั้ง</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    rollContainer.appendChild(div);
+                });
+            }
+
+            updateAIInsights(overTargetPersons, abnormalCount, normalCount, currentFilteredAdditional);
         }
 
-        function updateAIInsights(overTargetPersons, abnormalCount, normalCount) {
+        function updateAIInsights(overTargetPersons, abnormalCount, normalCount, rollData) {
             const strengthsList = document.getElementById('ai-strengths-list');
             const improvementsList = document.getElementById('ai-improvements-list');
             strengthsList.innerHTML = '';
@@ -1527,27 +1598,40 @@
             let improvements = [];
 
             if (normalCount > 0) {
-                strengths.push(`มีกะและเครื่องจักรจำนวน ${normalCount} รายการที่สามารถควบคุมอัตรา Waste ได้อยู่ในเกณฑ์มาตรฐาน (≤ 2.00%) ได้อย่างสม่ำเสมอ`);
+                strengths.push(`จากข้อมูลปัจจุบัน มีกะและเครื่องจักรจำนวน ${normalCount} รายการที่สามารถควบคุมอัตรา Waste ได้อยู่ในเกณฑ์มาตรฐาน (≤ 2.00%)`);
             } else {
-                strengths.push(`ระบบบันทึกและจัดเก็บข้อมูลจาก Google Sheets สามารถเชื่อมต่อและดึงข้อมูลแบบ Real-time ได้อย่างสมบูรณ์`);
+                strengths.push(`ระบบบันทึกและจัดเก็บข้อมูลจาก Google Sheets เชื่อมต่อแบบ Real-time พร้อมวิเคราะห์ข้อมูลล่าสุด`);
             }
 
-            let totalNCPPersons = [...new Set(parsedRowsNCP.map(r => r.ncpName).filter(Boolean))].length;
+            let totalNCPPersons = [...new Set(currentFilteredNCP.map(r => r.ncpName).filter(Boolean))].length;
             let compliantPersons = totalNCPPersons - overTargetPersons.length;
             if (totalNCPPersons > 0) {
-                strengths.push(`บุคลากรส่วนใหญ่ (${compliantPersons} จาก ${totalNCPPersons} คน) ปฏิบัติงานได้ตามเป้าหมาย โดยไม่มีประวัติเกิน 2 พาเลทบ่อยครั้ง`);
+                strengths.push(`บุคลากรในรอบนี้ (${compliantPersons} จาก ${totalNCPPersons} คน) ควบคุมพาเลทอยู่ในเกณฑ์มาตรฐาน ไม่เกิน 2 พาเลทบ่อยครั้ง`);
+            } else {
+                strengths.push(`ไม่พบรายการ NCP รายบุคคลในช่วงเวลาที่เลือก`);
+            }
+
+            let totalRollIssues = rollData.reduce((sum, r) => sum + r.countS, 0);
+            let stopRollIssues = rollData.filter(r => isStoppageRecord(r.stopU)).reduce((sum, r) => sum + r.countS, 0);
+            if (totalRollIssues > 0) {
+                let nonStopRatio = (((totalRollIssues - stopRollIssues) / totalRollIssues) * 100).toFixed(1);
+                strengths.push(`สถิติม้วนวัตถุดิบมีสัดส่วนการแก้ไขแบบไม่หยุดเครื่องสูงถึง ${nonStopRatio}% ซึ่งช่วยลดผลกระทบต่อเวลาเดินเครื่องรวม`);
             }
 
             if (overTargetPersons.length > 0) {
-                improvements.push(`พบพนักงาน ${overTargetPersons.length} ท่านที่มีความถี่ในการเกิดพาเลทเกิน 2 พาเลท ควรจัดให้มีการอบรมหน้างานหรือทบทวนขั้นตอนปฏิบัติเป็นรายบุคคล`);
+                improvements.push(`พบพนักงานจำนวน ${overTargetPersons.length} ท่านที่เกิดพาเลทเกิน 2 พาเลทในตัวกรองนี้ ควรเน้นย้ำมาตรฐานการตรวจสอบหน้างาน`);
             } else {
-                improvements.push(`ควรรักษาระดับความผิดพลาดให้อยู่ในเกณฑ์ 0 ครั้งอย่างต่อเนื่อง`);
+                improvements.push(`รักษาสถิติความผิดพลาดรายบุคคลเป็นศูนย์อย่างต่อเนื่อง`);
             }
 
             if (abnormalCount > 0) {
-                improvements.push(`มีเครื่องจักรและกะการทำงานจำนวน ${abnormalCount} รายการที่อัตรา Waste เกิน 2.00% จำเป็นต้องตรวจสอบสภาพเครื่องจักรและสอบเทียบเซนเซอร์การป้อนแผ่นด่วน`);
+                improvements.push(`พบเครื่องจักรและกะการทำงาน ${abnormalCount} รายการที่เปอร์เซ็นต์ Waste เกิน 2.00% ควรตรวจสอบการป้อนแผ่นและอุณหภูมิเครื่องด่วน`);
             } else {
-                improvements.push(`ภาพรวม Waste ทุกกะผ่านเกณฑ์มาตรฐาน ควรกำหนดเป้าหมายใหม่ที่เข้มงวดขึ้น (เช่น ไม่เกิน 1.50%) เพื่อพัฒนาศักยภาพการผลิตต่อเนื่อง`);
+                improvements.push(`ภาพรวม Waste ทุกกะผ่านเกณฑ์มาตรฐานทั้งหมด สามารถพิจารณายกระดับเป้าหมายให้เข้มงวดขึ้นได้`);
+            }
+
+            if (stopRollIssues > 0) {
+                improvements.push(`มีเหตุการณ์ปัญหาม้วนจนต้อง "หยุดเครื่อง" รวม ${stopRollIssues} ครั้ง ควรตรวจสอบคุณภาพม้วนและประสานงาน Supplier ล่วงหน้า`);
             }
 
             strengths.forEach(s => {
@@ -1582,7 +1666,7 @@
         }
 
         function exportSummaryReport() {
-            alert('ระบบกำลังดาวน์โหลดรายงานสรุปและแนวทางการแก้ไขปัญหา');
+            alert('ระบบกำลังดาวน์โหลดรายงานสรุปและแนวทางการแก้ไขปัญหาตามข้อมูลล่าสุด');
         }
 
         window.onload = loadAllData;
