@@ -286,7 +286,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1.5">ถึงวันที่</label>
-                    <input type="date" id="add-end-date" onchange="filterAdditionalData()" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                    <input type="date" id="add-end-date" value="2026-12-31" onchange="filterAdditionalData()" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1.5">หน่วยงาน</label>
@@ -327,6 +327,27 @@
                         <h4 id="add-total-issues" class="text-2xl font-bold text-slate-800 mt-1">0</h4>
                     </div>
                     <div class="p-3 bg-amber-50 text-amber-600 rounded-xl text-xl">⚠️</div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 border-b border-slate-100 pb-4">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                            <span>📈</span> กราฟเส้นแสดงจำนวนครั้งของปัญหาม้วนตามช่วงเวลา
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">วิเคราะห์สถิติความถี่จำนวนครั้งของปัญหาม้วนตามช่วงเวลา</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+                            <button onclick="setAddView('daily')" id="add-btn-daily" class="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow-sm transition-all">Daily</button>
+                            <button onclick="setAddView('weekly')" id="add-btn-weekly" class="px-3.5 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all">Weekly</button>
+                            <button onclick="setAddView('monthly')" id="add-btn-monthly" class="px-3.5 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all">Monthly</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative h-80 w-full">
+                    <canvas id="addTrendChart"></canvas>
                 </div>
             </div>
 
@@ -468,8 +489,10 @@
         let parsedRowsAdditional = [];
         let ncpChartInstance = null;
         let wasteShiftChartInstance = null;
+        let addTrendChartInstance = null;
         let currentView = 'daily';
         let currentWasteView = 'daily';
+        let currentAddView = 'daily';
         let currentFilteredNCP = [];
         let currentFilteredWaste = [];
         let currentFilteredAdditional = [];
@@ -694,29 +717,15 @@
             const addDates = parsedRowsAdditional.map(r => r.dateVal).filter(Boolean).sort();
             if (addDates.length > 0 && !document.getElementById('add-start-date').value) {
                 document.getElementById('add-start-date').value = addDates[0];
-                document.getElementById('add-end-date').value = addDates[addDates.length - 1];
+                if (!document.getElementById('add-end-date').value) {
+                    document.getElementById('add-end-date').value = '2026-12-31';
+                }
             }
-        }
-
-        function resetNCPFilters() {
-            document.getElementById('ncp-start-date').value = '';
-            document.getElementById('ncp-end-date').value = '';
-            document.getElementById('ncp-machine-filter').value = '';
-            document.getElementById('ncp-shift-filter').value = '';
-            filterNCPData();
-        }
-
-        function resetWasteFilters() {
-            document.getElementById('waste-start-date').value = '';
-            document.getElementById('waste-end-date').value = '';
-            document.getElementById('waste-machine').value = '';
-            document.getElementById('waste-shift').value = '';
-            filterWasteData();
         }
 
         function resetAdditionalFilters() {
             document.getElementById('add-start-date').value = '';
-            document.getElementById('add-end-date').value = '';
+            document.getElementById('add-end-date').value = '2026-12-31';
             document.getElementById('add-dept-filter').value = '';
             document.getElementById('add-machine-filter').value = '';
             document.getElementById('add-shift-filter').value = '';
@@ -747,6 +756,19 @@
                 }
             });
             renderWasteShiftChart(currentFilteredWaste);
+        }
+
+        function setAddView(v) {
+            currentAddView = v;
+            ['daily', 'weekly', 'monthly'].forEach(mode => {
+                const btn = document.getElementById(`add-btn-${mode}`);
+                if (mode === v) {
+                    btn.className = 'px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow-sm transition-all';
+                } else {
+                    btn.className = 'px-3.5 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all';
+                }
+            });
+            renderAddTrendChart(currentFilteredAdditional);
         }
 
         function filterNCPData() {
@@ -873,9 +895,8 @@
                             <div>
                                 <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
                                     <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm font-semibold">👤</span>
-                                    ${person}
+                                    ${person} ${machineList ? `(${machineList})` : ''}
                                 </h3>
-                                ${machineList ? `<p class="text-xs text-indigo-600 font-medium mt-1 ml-10">เครื่องจักร: ${machineList}</p>` : ''}
                             </div>
                             <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg font-medium">${pRows.length} รายการ</span>
                         </div>
@@ -978,7 +999,70 @@
             let totalIssuesCount = currentFilteredAdditional.reduce((sum, r) => sum + r.countS, 0);
             document.getElementById('add-total-issues').textContent = totalIssuesCount.toLocaleString();
 
+            renderAddTrendChart(currentFilteredAdditional);
             renderAdditionalShiftCards(currentFilteredAdditional);
+        }
+
+        function renderAddTrendChart(data) {
+            const ctx = document.getElementById('addTrendChart').getContext('2d');
+            let timeLabels = [...new Set(data.map(r => getGroupKey(r.dateVal, currentAddView)).filter(Boolean))].sort();
+
+            let countsByTime = timeLabels.map(tLabel => {
+                let tRows = data.filter(r => getGroupKey(r.dateVal, currentAddView) === tLabel);
+                return tRows.reduce((sum, r) => sum + r.countS, 0);
+            });
+
+            if (addTrendChartInstance) addTrendChartInstance.destroy();
+            addTrendChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: timeLabels.length > 0 ? timeLabels : ['ไม่มีข้อมูล'],
+                    datasets: [{
+                        label: 'จำนวนครั้งปัญหาม้วน',
+                        data: countsByTime.length > 0 ? countsByTime : [0],
+                        borderColor: '#6366f1',
+                        backgroundColor: '#6366f1',
+                        borderWidth: 2.5,
+                        tension: 0.2,
+                        fill: false,
+                        pointRadius: 4,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { family: 'Prompt', size: 12 } } },
+                        tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: { family: 'Prompt' }, bodyFont: { family: 'Prompt' }, padding: 12 }
+                    },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { font: { family: 'Prompt' } } },
+                        y: { beginAtZero: true, ticks: { precision: 0, font: { family: 'Prompt' } }, grid: { color: '#f1f5f9' } }
+                    }
+                },
+                plugins: [{
+                    id: 'customAddDataLabels',
+                    afterDatasetsDraw(chart) {
+                        const { ctx } = chart;
+                        chart.data.datasets.forEach((dataset, datasetIndex) => {
+                            const meta = chart.getDatasetMeta(datasetIndex);
+                            if (!meta.hidden) {
+                                meta.data.forEach((element, index) => {
+                                    const value = dataset.data[index];
+                                    if (value !== undefined && value !== null) {
+                                        ctx.fillStyle = '#475569';
+                                        ctx.font = '10px Prompt, sans-serif';
+                                        ctx.textAlign = 'center';
+                                        ctx.textBaseline = 'bottom';
+                                        ctx.fillText(value, element.x, element.y - 6);
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }]
+            });
         }
 
         function isStoppageRecord(stopVal) {
