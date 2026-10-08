@@ -122,31 +122,68 @@
                         <option value="">ทั้งหมด</option>
                     </select>
                 </div>
-                <div class="flex items-end">
-                    <button onclick="resetNCPFilters()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium p-2.5 rounded-xl text-sm transition-all border border-slate-200 flex items-center justify-center gap-2">
-                        <span>🔄</span> รีเซ็ตตัวกรอง
+                <div class="relative">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">ปัญหาที่พบ (เลือกได้หลายปัญหา)</label>
+                    <div class="relative">
+                        <button type="button" onclick="toggleProblemDropdown()" id="problem-dropdown-btn" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-sm text-left flex justify-between items-center focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                            <span id="problem-dropdown-label" class="truncate">ทั้งหมด</span>
+                            <svg class="w-4 h-4 text-slate-500 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div id="problem-dropdown-menu" class="hidden absolute left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-3 max-h-60 overflow-y-auto custom-scrollbar space-y-2">
+                            <div class="flex items-center justify-between pb-2 border-b border-slate-100 text-xs">
+                                <label class="font-semibold text-indigo-600 cursor-pointer hover:underline" onclick="selectAllProblems(true)">เลือกทั้งหมด</label>
+                                <label class="font-semibold text-slate-500 cursor-pointer hover:underline" onclick="selectAllProblems(false)">ล้างตัวเลือก</label>
+                            </div>
+                            <div id="problem-checkboxes-container" class="space-y-1.5"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-span-full flex justify-end">
+                    <button onclick="resetNCPFilters()" class="w-full sm:w-auto px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium p-2.5 rounded-xl text-sm transition-all border border-slate-200 flex items-center justify-center gap-2">
+                        <span>🔄</span> รีเซ็ตตัวกรอง NCP
                     </button>
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 border-b border-slate-100 pb-4">
-                    <div>
-                        <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
-                            <span>📈</span> แนวโน้มจำนวนครั้งที่เกิน 2 พาเลทรายบุคคล
-                        </h2>
-                        <p class="text-xs text-slate-500 mt-0.5">วิเคราะห์สถิติความถี่ในการเกิดพาเลทเกินตามช่วงเวลา</p>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
-                            <button onclick="setNCPView('daily')" id="btn-daily" class="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow-sm transition-all">Daily</button>
-                            <button onclick="setNCPView('weekly')" id="btn-weekly" class="px-3.5 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all">Weekly</button>
-                            <button onclick="setNCPView('monthly')" id="btn-monthly" class="px-3.5 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all">Monthly</button>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 border-b border-slate-100 pb-4">
+                        <div>
+                            <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                                <span>📈</span> แนวโน้มจำนวนครั้งที่เกิน 2 พาเลทรายบุคคล
+                            </h2>
+                            <p class="text-xs text-slate-500 mt-0.5">วิเคราะห์สถิติความถี่ในการเกิดพาเลทเกินตามช่วงเวลา</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+                                <button onclick="setNCPView('daily')" id="btn-daily" class="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow-sm transition-all">Daily</button>
+                                <button onclick="setNCPView('weekly')" id="btn-weekly" class="px-3.5 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all">Weekly</button>
+                                <button onclick="setNCPView('monthly')" id="btn-monthly" class="px-3.5 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all">Monthly</button>
+                            </div>
                         </div>
                     </div>
+                    <div class="relative h-80 w-full">
+                        <canvas id="ncpChart"></canvas>
+                    </div>
                 </div>
-                <div class="relative h-80 w-full">
-                    <canvas id="ncpChart"></canvas>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 border-b border-slate-100 pb-4">
+                        <div>
+                            <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                                <span>📊</span> Top 10 ปัญหาของเสียรายบุคคล (น้ำหนักรวม kg)
+                            </h2>
+                            <p class="text-xs text-slate-500 mt-0.5">จัดอันดับปัญหาของเสียสูงสุด 10 อันดับแรก แยกตามบุคคลที่เลือก</p>
+                        </div>
+                        <div>
+                            <select id="ncp-top10-person-select" onchange="renderNCPTop10PersonChart(currentFilteredNCP)" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                                <option value="">-- เลือกบุคลากรทั้งหมด --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="relative h-80 w-full">
+                        <canvas id="ncpTop10PersonChart"></canvas>
+                    </div>
                 </div>
             </div>
 
@@ -512,6 +549,7 @@
         let parsedRowsWaste = [];
         let parsedRowsAdditional = [];
         let ncpChartInstance = null;
+        let ncpTop10PersonChartInstance = null;
         let wasteShiftChartInstance = null;
         let addTrendChartInstance = null;
         let supplierPieChartInstance = null;
@@ -712,16 +750,19 @@
         function initFilters() {
             const machinesNCP = [...new Set(parsedRowsNCP.map(r => r.ncpMachine).filter(Boolean))].sort();
             const shiftsNCP = [...new Set(parsedRowsNCP.map(r => r.ncpShift).filter(Boolean))].sort();
+            const personsNCP = [...new Set(parsedRowsNCP.map(r => r.ncpName).filter(Boolean))].sort();
+            const problemsNCP = [...new Set(parsedRowsNCP.map(r => r.ncpProblemU).filter(p => p && p !== '-' && p.toLowerCase() !== 'nan'))].sort();
+
             const machinesWaste = [...new Set(parsedRowsWaste.map(r => r.wasteMachine).filter(Boolean))].sort();
             const shiftsWaste = [...new Set(parsedRowsWaste.map(r => r.wasteShift).filter(Boolean))].sort();
             const machinesAdd = [...new Set(parsedRowsAdditional.map(r => r.machineT).filter(Boolean))].sort();
             const shiftsAdd = [...new Set(parsedRowsAdditional.map(r => r.shiftP).filter(Boolean))].sort();
             const deptsAdd = [...new Set(parsedRowsAdditional.map(r => r.deptK).filter(Boolean))].sort();
 
-            const populateSelect = (elementId, items) => {
+            const populateSelect = (elementId, items, defaultText = 'ทั้งหมด') => {
                 const el = document.getElementById(elementId);
                 const currentVal = el.value;
-                el.innerHTML = '<option value="">ทั้งหมด</option>';
+                el.innerHTML = `<option value="">${defaultText}</option>`;
                 items.forEach(item => {
                     let opt = document.createElement('option');
                     opt.value = item;
@@ -733,11 +774,25 @@
 
             populateSelect('ncp-machine-filter', machinesNCP);
             populateSelect('ncp-shift-filter', shiftsNCP);
+            populateSelect('ncp-top10-person-select', personsNCP, '-- เลือกบุคลากรทั้งหมด --');
             populateSelect('waste-machine', machinesWaste);
             populateSelect('waste-shift', shiftsWaste);
             populateSelect('add-machine-filter', machinesAdd);
             populateSelect('add-shift-filter', shiftsAdd);
             populateSelect('add-dept-filter', deptsAdd);
+
+            // Populate Problem checkboxes
+            const probContainer = document.getElementById('problem-checkboxes-container');
+            probContainer.innerHTML = '';
+            problemsNCP.forEach(prob => {
+                let div = document.createElement('label');
+                div.className = 'flex items-center gap-2 text-xs text-slate-700 cursor-pointer hover:bg-slate-50 p-1.5 rounded-lg transition-colors';
+                div.innerHTML = `
+                    <input type="checkbox" name="ncp-problem-checkbox" value="${prob}" checked onchange="filterNCPData()" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4">
+                    <span class="truncate" title="${prob}">${prob}</span>
+                `;
+                probContainer.appendChild(div);
+            });
 
             const ncpDates = parsedRowsNCP.map(r => r.ncpDate).filter(Boolean).sort();
             if (ncpDates.length > 0 && !document.getElementById('ncp-start-date').value) {
@@ -760,11 +815,45 @@
             }
         }
 
+        function toggleProblemDropdown() {
+            const menu = document.getElementById('problem-dropdown-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        window.addEventListener('click', function(e) {
+            const btn = document.getElementById('problem-dropdown-btn');
+            const menu = document.getElementById('problem-dropdown-menu');
+            if (btn && menu && !btn.contains(e.target) && !menu.contains(e.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+
+        function selectAllProblems(status) {
+            const checkboxes = document.querySelectorAll('input[name="ncp-problem-checkbox"]');
+            checkboxes.forEach(cb => cb.checked = status);
+            filterNCPData();
+        }
+
+        function updateProblemDropdownLabel() {
+            const checkboxes = document.querySelectorAll('input[name="ncp-problem-checkbox"]');
+            const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+            const labelEl = document.getElementById('problem-dropdown-label');
+            if (checkedCount === 0) {
+                labelEl.textContent = 'ไม่ได้เลือก (ไม่มีข้อมูล)';
+            } else if (checkedCount === checkboxes.length) {
+                labelEl.textContent = 'ทั้งหมด';
+            } else {
+                labelEl.textContent = `เลือกแล้ว (${checkedCount} ปัญหา)`;
+            }
+        }
+
         function resetNCPFilters() {
             document.getElementById('ncp-start-date').value = '';
             document.getElementById('ncp-end-date').value = '';
             document.getElementById('ncp-machine-filter').value = '';
             document.getElementById('ncp-shift-filter').value = '';
+            document.getElementById('ncp-top10-person-select').value = '';
+            selectAllProblems(true);
             filterNCPData();
         }
 
@@ -830,15 +919,28 @@
             const machine = document.getElementById('ncp-machine-filter').value;
             const shift = document.getElementById('ncp-shift-filter').value;
 
+            const selectedProblems = Array.from(document.querySelectorAll('input[name="ncp-problem-checkbox"]:checked')).map(cb => cb.value);
+            updateProblemDropdownLabel();
+
             currentFilteredNCP = parsedRowsNCP.filter(r => {
                 if (startDate && r.ncpDate && r.ncpDate < startDate) return false;
                 if (endDate && r.ncpDate && r.ncpDate > endDate) return false;
                 if (machine && r.ncpMachine !== machine) return false;
                 if (shift && r.ncpShift !== shift) return false;
+                
+                let prob = (r.ncpProblemU || '').trim();
+                if (prob && prob !== '-' && prob.toLowerCase() !== 'nan') {
+                    if (!selectedProblems.includes(prob)) return false;
+                } else {
+                    if (!selectedProblems.includes('')) {
+                        // check if any problem matches
+                    }
+                }
                 return true;
             });
 
             renderNCPChart(currentFilteredNCP);
+            renderNCPTop10PersonChart(currentFilteredNCP);
             renderNCPCards(currentFilteredNCP);
             renderNCPExcessTable(currentFilteredNCP);
         }
@@ -864,11 +966,11 @@
                     data: countsByTime,
                     borderColor: colorPalette[index % colorPalette.length],
                     backgroundColor: colorPalette[index % colorPalette.length],
-                    borderWidth: 2,
+                    borderWidth: 2.5,
                     tension: 0.2,
                     fill: false,
-                    pointRadius: 3,
-                    pointHoverRadius: 6
+                    pointRadius: 4,
+                    pointHoverRadius: 7
                 };
             });
 
@@ -888,9 +990,133 @@
                     },
                     scales: {
                         x: { grid: { display: false }, ticks: { font: { family: 'Prompt' } } },
-                        y: { beginAtZero: true, ticks: { precision: 0, font: { family: 'Prompt' } }, grid: { color: '#f1f5f9' } }
+                        y: { 
+                            beginAtZero: true, 
+                            ticks: { precision: 0, font: { family: 'Prompt' } }, 
+                            grid: { color: '#f1f5f9' },
+                            grace: '15%'
+                        }
                     }
+                },
+                plugins: [{
+                    id: 'customNCPLineDataLabels',
+                    afterDatasetsDraw(chart) {
+                        const { ctx } = chart;
+                        chart.data.datasets.forEach((dataset, datasetIndex) => {
+                            const meta = chart.getDatasetMeta(datasetIndex);
+                            if (!meta.hidden) {
+                                meta.data.forEach((element, index) => {
+                                    const value = dataset.data[index];
+                                    if (value !== undefined && value !== null && value > 0) {
+                                        ctx.fillStyle = dataset.borderColor;
+                                        ctx.font = 'bold 10px Prompt, sans-serif';
+                                        ctx.textAlign = 'center';
+                                        ctx.textBaseline = 'bottom';
+                                        ctx.fillText(Math.round(value), element.x, element.y - 6);
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }]
+            });
+        }
+
+        function renderNCPTop10PersonChart(data) {
+            const ctx = document.getElementById('ncpTop10PersonChart').getContext('2d');
+            const selectedPerson = document.getElementById('ncp-top10-person-select').value;
+
+            let targetRows = data;
+            if (selectedPerson) {
+                targetRows = data.filter(r => r.ncpName === selectedPerson);
+            }
+
+            let problemMap = {};
+            targetRows.forEach(r => {
+                let prob = (r.ncpProblemU || '').trim();
+                if (prob && prob !== '-' && prob.toLowerCase() !== 'nan') {
+                    problemMap[prob] = (problemMap[prob] || 0) + (r.ncpWeightY || 0);
                 }
+            });
+
+            let sortedProblems = Object.keys(problemMap).map(prob => ({
+                problem: prob,
+                weight: problemMap[prob]
+            })).sort((a, b) => b.weight - a.weight).slice(0, 10);
+
+            let labels = sortedProblems.map(item => item.problem);
+            let weights = sortedProblems.map(item => Math.round(item.weight));
+
+            if (ncpTop10PersonChartInstance) ncpTop10PersonChartInstance.destroy();
+            ncpTop10PersonChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels.length > 0 ? labels : ['ไม่มีข้อมูล'],
+                    datasets: [{
+                        label: 'น้ำหนักของเสียรวม (kg)',
+                        data: weights.length > 0 ? weights : [0],
+                        backgroundColor: '#6366f1',
+                        borderRadius: 6,
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { 
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)', 
+                            titleFont: { family: 'Prompt' }, 
+                            bodyFont: { family: 'Prompt' }, 
+                            padding: 12,
+                            callbacks: {
+                                label: function(context) {
+                                    return ` น้ำหนัก: ${Math.round(context.parsed.x).toLocaleString()} kg`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { 
+                            beginAtZero: true, 
+                            grid: { color: '#f1f5f9' }, 
+                            ticks: { font: { family: 'Prompt', size: 10 }, callback: function(value) { return Math.round(value).toLocaleString() + ' kg'; } },
+                            grace: '15%'
+                        },
+                        y: { 
+                            grid: { display: false }, 
+                            ticks: { 
+                                font: { family: 'Prompt', size: 11 },
+                                callback: function(value, index) {
+                                    let label = this.getLabelForValue(index);
+                                    return label.length > 25 ? label.substring(0, 25) + '...' : label;
+                                }
+                            } 
+                        }
+                    }
+                },
+                plugins: [{
+                    id: 'customTop10DataLabels',
+                    afterDatasetsDraw(chart) {
+                        const { ctx } = chart;
+                        chart.data.datasets.forEach((dataset, datasetIndex) => {
+                            const meta = chart.getDatasetMeta(datasetIndex);
+                            if (!meta.hidden) {
+                                meta.data.forEach((element, index) => {
+                                    const value = dataset.data[index];
+                                    if (value !== undefined && value !== null && value > 0) {
+                                        ctx.fillStyle = '#334155';
+                                        ctx.font = 'bold 10px Prompt, sans-serif';
+                                        ctx.textAlign = 'left';
+                                        ctx.textBaseline = 'middle';
+                                        ctx.fillText(Math.round(value).toLocaleString() + ' kg', element.x + 6, element.y);
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }]
             });
         }
 
@@ -939,7 +1165,7 @@
                     problemsHtml = `<li class="text-slate-400 text-xs">- ไม่พบข้อมูลปัญหา -</li>`;
                 } else {
                     sortedProblems.forEach((item, idx) => {
-                        problemsHtml += `<li class="flex justify-between items-center text-xs py-1 border-b border-slate-50 last:border-0"><span class="text-slate-700 truncate pr-2" title="${item.problem}">${idx + 1}. ${item.problem}</span><span class="font-semibold text-indigo-600 whitespace-nowrap">${item.weight.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} kg</span></li>`;
+                        problemsHtml += `<li class="flex justify-between items-center text-xs py-1 border-b border-slate-50 last:border-0"><span class="text-slate-700 truncate pr-2" title="${item.problem}">${idx + 1}. ${item.problem}</span><span class="font-semibold text-indigo-600 whitespace-nowrap">${Math.round(item.weight).toLocaleString()} kg</span></li>`;
                     });
                 }
 
@@ -966,7 +1192,7 @@
                             </div>
                             <div class="bg-slate-50 border border-slate-200/70 p-2.5 rounded-xl">
                                 <p class="text-[10px] font-semibold text-slate-500">น้ำหนักของเสีย</p>
-                                <p class="text-xs font-bold text-amber-600 mt-0.5">${totalWeightY.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} kg</p>
+                                <p class="text-xs font-bold text-amber-600 mt-0.5">${Math.round(totalWeightY).toLocaleString()} kg</p>
                             </div>
                         </div>
 
@@ -1116,7 +1342,7 @@
                                         ctx.font = '10px Prompt, sans-serif';
                                         ctx.textAlign = 'center';
                                         ctx.textBaseline = 'bottom';
-                                        ctx.fillText(value, element.x, element.y - 6);
+                                        ctx.fillText(Math.round(value), element.x, element.y - 6);
                                     }
                                 });
                             }
