@@ -36,7 +36,13 @@
 </head>
 <body class="text-slate-800 antialiased min-h-screen flex flex-col">
 
-    <header class="bg-indigo-600 text-white shadow-lg sticky top-0 z-50 backdrop-blur-md bg-opacity-95">
+    <!-- Custom Notification Box -->
+    <div id="custom-toast" class="fixed bottom-6 right-6 z-50 hidden bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 transition-all duration-300 transform translate-y-2">
+        <span id="toast-icon">ℹ️</span>
+        <span id="toast-message" class="text-sm font-medium">แจ้งเตือนระบบ</span>
+    </div>
+
+    <header class="bg-indigo-600 text-white shadow-lg sticky top-0 z-40 backdrop-blur-md bg-opacity-95">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
                 <div class="p-2 bg-indigo-700 rounded-xl shadow-inner text-xl">📊</div>
@@ -45,7 +51,7 @@
                     <p class="text-xs text-indigo-200">Real-time Dashboard from Google Sheets</p>
                 </div>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 flex-wrap justify-center">
                 <nav class="flex flex-wrap space-x-1.5 bg-indigo-900/50 p-1.5 rounded-xl border border-indigo-500/30">
                     <button onclick="switchTab('ncp')" id="tab-btn-ncp" class="px-3.5 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all bg-white text-indigo-700 shadow-sm flex items-center gap-1.5">
                         <span>🔍</span> NCP รายบุคคล
@@ -60,9 +66,14 @@
                         <span>📝</span> สรุปและ AI Insights
                     </button>
                 </nav>
-                <button onclick="loadAllData()" title="รีเฟรชข้อมูล" class="p-2 bg-indigo-700 hover:bg-indigo-800 text-indigo-100 rounded-xl transition-all shadow-sm flex items-center justify-center border border-indigo-500/40">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                </button>
+                <div class="flex items-center gap-2">
+                    <button onclick="openConfigModal()" title="ตั้งค่าลิงก์ Google Sheets" class="p-2 bg-indigo-700 hover:bg-indigo-800 text-indigo-100 rounded-xl transition-all shadow-sm flex items-center justify-center border border-indigo-500/40 text-xs gap-1 px-3">
+                        <span>⚙️</span> ตั้งค่าลิงก์
+                    </button>
+                    <button onclick="loadAllData()" title="รีเฟรชข้อมูล" class="p-2 bg-indigo-700 hover:bg-indigo-800 text-indigo-100 rounded-xl transition-all shadow-sm flex items-center justify-center border border-indigo-500/40">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    </button>
+                </div>
             </div>
         </div>
     </header>
@@ -75,6 +86,38 @@
         </div>
     </div>
 
+    <!-- Config Modal -->
+    <div id="config-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full flex flex-col overflow-hidden border border-slate-200 animate-fade-in">
+            <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <div>
+                    <h3 class="font-bold text-slate-800 text-base">⚙️ ตั้งค่าลิงก์ Google Sheets CSV</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">ระบุลิงก์ CSV ของแต่ละแท็บข้อมูลเพื่อดึงข้อมูลแบบไดนามิก</p>
+                </div>
+                <button onclick="closeConfigModal()" class="p-2 hover:bg-slate-200 text-slate-600 rounded-xl transition-all">✕</button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">ลิงก์ Google Sheets: แท็บ NCP รายบุคคล</label>
+                    <input type="text" id="config-ncp-url" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">ลิงก์ Google Sheets: แท็บ Waste</label>
+                    <input type="text" id="config-waste-url" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">ลิงก์ Google Sheets: แท็บ ปัญหาม้วน (Additional)</label>
+                    <input type="text" id="config-add-url" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                </div>
+            </div>
+            <div class="p-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-2">
+                <button onclick="resetDefaultConfig()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold rounded-xl transition-all">คืนค่าเริ่มต้น</button>
+                <button onclick="saveAndReloadConfig()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl transition-all shadow-sm">บันทึกและโหลดข้อมูล</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
     <div id="detail-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[85vh] flex flex-col overflow-hidden border border-slate-200 animate-fade-in">
             <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
@@ -100,6 +143,7 @@
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full space-y-6">
 
+        <!-- TAB 1: NCP -->
         <div id="tab-ncp" class="space-y-6">
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div>
@@ -152,7 +196,7 @@
                             <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
                                 <span>📈</span> แนวโน้มจำนวนครั้งที่เกิน 2 พาเลทรายบุคคล
                             </h2>
-                            <p class="text-xs text-slate-500 mt-0.5">วิเคราะห์สถิติความถี่ในการเกิดพาเลทเกินตามช่วงเวลา</p>
+                            <p class="text-xs text-slate-500 mt-0.5">วิเคราะห์สถิติความถี่ในการเกิดพาเลทเกินตามช่วงเวลา (คลิกที่จุดบนกราฟเพื่อดูรายละเอียด)</p>
                         </div>
                         <div class="flex items-center gap-3">
                             <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
@@ -173,7 +217,7 @@
                             <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
                                 <span>📊</span> Top 10 ปัญหาของเสียรายบุคคล (น้ำหนักรวม kg)
                             </h2>
-                            <p class="text-xs text-slate-500 mt-0.5">จัดอันดับปัญหาของเสียสูงสุด 10 อันดับแรก แยกตามบุคคลที่เลือก</p>
+                            <p class="text-xs text-slate-500 mt-0.5">จัดอันดับปัญหาของเสียสูงสุด 10 อันดับแรก (คลิกที่แท่งกราฟเพื่อดูรายละเอียด)</p>
                         </div>
                         <div>
                             <select id="ncp-top10-person-select" onchange="renderNCPTop10PersonChart(currentFilteredNCP)" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
@@ -190,7 +234,7 @@
             <div>
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
-                        <span>👥</span> สรุปสถิติรายบุคคล (คลิกเพื่อดูรายละเอียด)
+                        <span>👥</span> สรุปสถิติรายบุคคล (คลิกการ์ดเพื่อดูรายละเอียด)
                     </h3>
                     <span id="ncp-person-count" class="text-xs bg-indigo-50 text-indigo-700 font-semibold px-3 py-1 rounded-full border border-indigo-100">0 บุคลากร</span>
                 </div>
@@ -200,7 +244,7 @@
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
                 <div class="p-4 sm:p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                     <h3 class="font-bold text-slate-800 flex items-center gap-2">
-                        <span>⚠️</span> รายละเอียดปัญหาที่ของเสียเกิน 50%
+                        <span>⚠️</span> รายละเอียดปัญหาที่ของเสียเกิน 50% (คลิกที่แถวเพื่อดูรายละเอียดเพิ่มเติม)
                     </h3>
                     <span id="ncp-excess-count" class="text-xs bg-red-50 text-red-700 font-semibold px-3 py-1 rounded-full border border-red-100">0 รายการ</span>
                 </div>
@@ -225,6 +269,7 @@
             </div>
         </div>
 
+        <!-- TAB 2: WASTE -->
         <div id="tab-waste" class="space-y-6 hidden">
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div>
@@ -287,7 +332,7 @@
                         <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
                             <span>📈</span> กราฟเส้นแสดงเปอร์เซ็นต์ Waste แยกรายกะตามช่วงเวลา
                         </h3>
-                        <p class="text-xs text-slate-500 mt-0.5">เปรียบเทียบสัดส่วนของเสียตามกะการทำงานในรูปแบบกราฟเส้น พร้อมแสดงตัวเลขเปอร์เซ็นต์</p>
+                        <p class="text-xs text-slate-500 mt-0.5">เปรียบเทียบสัดส่วนของเสียตามกะการทำงานในรูปแบบกราฟเส้น (คลิกจุดบนกราฟเพื่อดูรายละเอียด)</p>
                     </div>
                     <div class="flex items-center gap-3">
                         <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
@@ -305,7 +350,7 @@
             <div>
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
-                        <span>🏷️</span> สรุปสถิติ Waste แยกรายกะ (เป้าหมายไม่เกิน 2.00%)
+                        <span>🏷️</span> สรุปสถิติ Waste แยกรายกะ (เป้าหมายไม่เกิน 2.00%) (คลิกการ์ดเพื่อดูรายละเอียด)
                     </h3>
                     <span id="waste-shift-count" class="text-xs bg-indigo-50 text-indigo-700 font-semibold px-3 py-1 rounded-full border border-indigo-100">0 กะ</span>
                 </div>
@@ -313,6 +358,7 @@
             </div>
         </div>
 
+        <!-- TAB 3: ADDITIONAL (ปัญหาม้วน) -->
         <div id="tab-additional" class="space-y-6 hidden">
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
                 <div>
@@ -372,7 +418,7 @@
                             <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
                                 <span>📈</span> กราฟเส้นแสดงจำนวนครั้งของปัญหาม้วนตามช่วงเวลา
                             </h3>
-                            <p class="text-xs text-slate-500 mt-0.5">วิเคราะห์สถิติความถี่จำนวนครั้งของปัญหาม้วนตามช่วงเวลา</p>
+                            <p class="text-xs text-slate-500 mt-0.5">วิเคราะห์สถิติความถี่จำนวนครั้งของปัญหาม้วนตามช่วงเวลา (คลิกที่จุดบนกราฟเพื่อดูรายละเอียด)</p>
                         </div>
                         <div class="flex items-center gap-3">
                             <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
@@ -384,6 +430,27 @@
                     </div>
                     <div class="relative h-80 w-full">
                         <canvas id="addTrendChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 lg:col-span-3">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 border-b border-slate-100 pb-4">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                                <span>📊</span> กราฟแสดงสถิติม้วน แยกตาม M (คลิกที่แท่งกราฟเพื่อดูรายละเอียด)
+                            </h3>
+                            <p class="text-xs text-slate-500 mt-0.5">เปรียบเทียบจำนวนครั้งปัญหาม้วนแยกตามรายละเอียด M</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <select id="add-m-stop-filter" onchange="renderAddDeptShiftBarChart(currentFilteredAdditional)" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                                <option value="all">สถานะหยุดเครื่อง: ทั้งหมด</option>
+                                <option value="stop">หยุดเครื่อง</option>
+                                <option value="nonstop">ไม่หยุดเครื่อง</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="relative h-80 w-full">
+                        <canvas id="addDeptShiftBarChart"></canvas>
                     </div>
                 </div>
 
@@ -415,7 +482,7 @@
             <div>
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
-                        <span>🏷️</span> สรุปปัญหาม้วนแยกตามกะการทำงานและหน่วยงาน (พร้อมรายละเอียดหยุดเครื่อง/ไม่หยุดเครื่อง และเวลาสูญเสีย)
+                        <span>🏷️</span> สรุปปัญหาม้วนแยกตามกะการทำงานและหน่วยงาน (คลิกการ์ดเพื่อดูรายละเอียด)
                     </h3>
                     <span id="add-shift-count" class="text-xs bg-indigo-50 text-indigo-700 font-semibold px-3 py-1 rounded-full border border-indigo-100">0 กะ</span>
                 </div>
@@ -423,6 +490,7 @@
             </div>
         </div>
 
+        <!-- TAB 4: SUMMARY & AI INSIGHTS -->
         <div id="tab-summary" class="space-y-6 hidden">
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
@@ -474,66 +542,24 @@
                         <span>🗑️</span> 2. สรุปกะที่ทำ Waste เกินเป้าหมาย (>2.00%) และกะที่ได้เป้า (≤2.00%) แยกตามเครื่องจักร
                     </h3>
                     <p class="text-xs text-slate-500 mb-4">จำแนกผลการดำเนินงานของเสียตามเครื่องจักรและกะการทำงานจากข้อมูลปัจจุบัน</p>
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="bg-red-50/60 border border-red-200 p-4 rounded-xl">
-                            <h4 class="font-bold text-red-800 text-xs mb-3 flex items-center gap-1.5">
-                                <span>⚠️</span> กะที่ทำ Waste เกินเป้าหมาย (> 2.00%) แยกตามเครื่องจักร
-                            </h4>
-                            <div id="summary-waste-abnormal-container" class="space-y-3"></div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-red-50/50 p-4 rounded-xl border border-red-200">
+                            <h4 class="font-bold text-red-800 text-xs mb-3">⚠️ กะที่ Waste เกินเป้าหมาย (>2.00%)</h4>
+                            <div id="summary-waste-abnormal-container" class="space-y-2"></div>
                         </div>
-                        <div class="bg-emerald-50/60 border border-emerald-200 p-4 rounded-xl">
-                            <h4 class="font-bold text-emerald-800 text-xs mb-3 flex items-center gap-1.5">
-                                <span>✅</span> กะที่ทำ Waste ได้ตามเป้าหมาย (≤ 2.00%) แยกตามเครื่องจักร
-                            </h4>
-                            <div id="summary-waste-normal-container" class="space-y-3"></div>
+                        <div class="bg-emerald-50/50 p-4 rounded-xl border border-emerald-200">
+                            <h4 class="font-bold text-emerald-800 text-xs mb-3">✅ กะที่ Waste ผ่านเกณฑ์ (≤2.00%)</h4>
+                            <div id="summary-waste-normal-container" class="space-y-2"></div>
                         </div>
                     </div>
                 </div>
 
                 <div class="bg-slate-50 border border-slate-200/80 p-5 rounded-2xl">
                     <h3 class="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2 text-indigo-700">
-                        <span>🏷️</span> 3. สรุปปัญหาม้วน (Roll Issues) และสถิติการหยุดเครื่องตามหน่วยงานปัจจุบัน
+                        <span>📈</span> 3. สรุปปัญหาม้วนตามกะและหน่วยงานจากข้อมูลปัจจุบัน
                     </h3>
-                    <p class="text-xs text-slate-500 mb-4">วิเคราะห์ปัญหาจากม้วนวัตถุดิบแยกตามกะ หน่วยงาน และสถานะการหยุดเครื่อง</p>
+                    <p class="text-xs text-slate-500 mb-4">สถิติปัญหาม้วน เวลาสูญเสีย และสถานะการหยุดเครื่องแยกตามกะและหน่วยงาน</p>
                     <div id="summary-roll-issues-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-                </div>
-
-                <div class="bg-slate-50 border border-slate-200/80 p-5 rounded-2xl">
-                    <h3 class="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2 text-indigo-700">
-                        <span>🛠️</span> 4. แนวทางการแก้ไขและมาตรการป้องกัน (CAPA)
-                    </h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse text-xs">
-                            <thead class="bg-slate-200/70 text-slate-700">
-                                <tr class="border-b border-slate-300">
-                                    <th class="p-3 font-semibold">หัวข้อปัญหาหลัก</th>
-                                    <th class="p-3 font-semibold">มาตรการแก้ไขเร่งด่วน (Corrective Action)</th>
-                                    <th class="p-3 font-semibold">มาตรการป้องกันระยะยาว (Preventive Action)</th>
-                                    <th class="p-3 font-semibold text-center">ผู้รับผิดชอบ</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-200 bg-white">
-                                <tr>
-                                    <td class="p-3 font-medium text-slate-800">NCP เกิน 2 พาเลทรายบุคคล</td>
-                                    <td class="p-3 text-slate-600">จัดประชุมทบทวนหน้างาน (TBM) และสลับผู้ปฏิบัติงานที่มีประสบการณ์ประกบคู่</td>
-                                    <td class="p-3 text-slate-600">จัดทำ Standardized Work Instruction พร้อมประเมินทักษะซ้ำทุกไตรมาส</td>
-                                    <td class="p-3 text-center text-indigo-600 font-semibold">Production Supervisor</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-3 font-medium text-slate-800">Waste เกินเป้าหมาย 2.00% แยกตามเครื่องจักร</td>
-                                    <td class="p-3 text-slate-600">ตรวจสอบและสอบเทียบเซนเซอร์การป้อนแผ่นและอุณหภูมิของเครื่องจักรที่มีอัตราเสียสูง</td>
-                                    <td class="p-3 text-slate-600">ทำ Preventive Maintenance (PM) เชิงรุกและตั้งระบบแจ้งเตือนแบบ Real-time</td>
-                                    <td class="p-3 text-center text-indigo-600 font-semibold">Maintenance & QA Team</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-3 font-medium text-slate-800">ปัญหาม้วนและการหยุดเครื่องจักร (Roll Issues)</td>
-                                    <td class="p-3 text-slate-600">ตรวจสอบคุณภาพม้วนกระดาษก่อนรับเข้ากระบวนการและประสานงาน Supplier ทันทีเมื่อพบความผิดปกติ</td>
-                                    <td class="p-3 text-slate-600">จัดทำเกณฑ์การตรวจรับวัตถุดิบ (Inspection Criteria) และทบทวน Supplier ร่วมกับฝ่ายจัดซื้อ</td>
-                                    <td class="p-3 text-center text-indigo-600 font-semibold">QA & Procurement Team</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
             </div>
         </div>
@@ -543,8 +569,12 @@
     <script>
         const DEFAULT_NCP_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSJLOKv2HXPLKnHoo3hc57LkyR4UIMbSsxQQb6BrCnqJplzbtJKc6Hhj7vx8_hYABvBMN4i8zNvcY0A/pub?output=csv";
         const DEFAULT_WASTE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSJLOKv2HXPLKnHoo3hc57LkyR4UIMbSsxQQb6BrCnqJplzbtJKc6Hhj7vx8_hYABvBMN4i8zNvcY0A/pub?gid=1361864594&single=true&output=csv";
-        const ADDITIONAL_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSJLOKv2HXPLKnHoo3hc57LkyR4UIMbSsxQQb6BrCnqJplzbtJKc6Hhj7vx8_hYABvBMN4i8zNvcY0A/pub?gid=758606907&single=true&output=csv";
+        const DEFAULT_ADDITIONAL_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSJLOKv2HXPLKnHoo3hc57LkyR4UIMbSsxQQb6BrCnqJplzbtJKc6Hhj7vx8_hYABvBMN4i8zNvcY0A/pub?gid=758606907&single=true&output=csv";
         
+        let ncpUrl = localStorage.getItem('custom_ncp_url') || DEFAULT_NCP_URL;
+        let wasteUrl = localStorage.getItem('custom_waste_url') || DEFAULT_WASTE_URL;
+        let addUrl = localStorage.getItem('custom_add_url') || DEFAULT_ADDITIONAL_URL;
+
         let parsedRowsNCP = [];
         let parsedRowsWaste = [];
         let parsedRowsAdditional = [];
@@ -552,6 +582,7 @@
         let ncpTop10PersonChartInstance = null;
         let wasteShiftChartInstance = null;
         let addTrendChartInstance = null;
+        let addDeptShiftBarChartInstance = null;
         let supplierPieChartInstance = null;
         let gradeBarChartInstance = null;
         let currentView = 'daily';
@@ -560,6 +591,51 @@
         let currentFilteredNCP = [];
         let currentFilteredWaste = [];
         let currentFilteredAdditional = [];
+
+        function showToast(message, icon = 'ℹ️') {
+            const toast = document.getElementById('custom-toast');
+            const msgEl = document.getElementById('toast-message');
+            const iconEl = document.getElementById('toast-icon');
+            if (!toast || !msgEl || !iconEl) return;
+            msgEl.textContent = message;
+            iconEl.textContent = icon;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3500);
+        }
+
+        function openConfigModal() {
+            document.getElementById('config-ncp-url').value = ncpUrl;
+            document.getElementById('config-waste-url').value = wasteUrl;
+            document.getElementById('config-add-url').value = addUrl;
+            document.getElementById('config-modal').classList.remove('hidden');
+        }
+
+        function closeConfigModal() {
+            document.getElementById('config-modal').classList.add('hidden');
+        }
+
+        function resetDefaultConfig() {
+            document.getElementById('config-ncp-url').value = DEFAULT_NCP_URL;
+            document.getElementById('config-waste-url').value = DEFAULT_WASTE_URL;
+            document.getElementById('config-add-url').value = DEFAULT_ADDITIONAL_URL;
+            showToast('คืนค่าลิงก์เริ่มต้นเรียบร้อย', '🔄');
+        }
+
+        function saveAndReloadConfig() {
+            ncpUrl = document.getElementById('config-ncp-url').value.trim() || DEFAULT_NCP_URL;
+            wasteUrl = document.getElementById('config-waste-url').value.trim() || DEFAULT_WASTE_URL;
+            addUrl = document.getElementById('config-add-url').value.trim() || DEFAULT_ADDITIONAL_URL;
+            
+            localStorage.setItem('custom_ncp_url', ncpUrl);
+            localStorage.setItem('custom_waste_url', wasteUrl);
+            localStorage.setItem('custom_add_url', addUrl);
+
+            closeConfigModal();
+            showToast('บันทึกและกำลังโหลดข้อมูลใหม่...', '📥');
+            loadAllData();
+        }
 
         function formatMinutesToHM(totalMinsNum) {
             if (!totalMinsNum || isNaN(totalMinsNum) || totalMinsNum <= 0) return '0 ชม. 0 นาที';
@@ -653,6 +729,7 @@
             ['ncp', 'waste', 'additional', 'summary'].forEach(t => {
                 const el = document.getElementById(`tab-${t}`);
                 const btn = document.getElementById(`tab-btn-${t}`);
+                if (!el || !btn) return;
                 if (t === tab) {
                     el.classList.remove('hidden');
                     btn.className = 'px-3.5 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all bg-white text-indigo-700 shadow-sm flex items-center gap-1.5';
@@ -668,15 +745,33 @@
 
         function loadAllData() {
             const overlay = document.getElementById('loading-overlay');
-            overlay.style.opacity = '1';
-            overlay.style.display = 'flex';
+            if (overlay) {
+                overlay.style.opacity = '1';
+                overlay.style.display = 'flex';
+            }
 
-            Papa.parse(DEFAULT_NCP_URL, {
+            let loadCount = 0;
+            const checkComplete = () => {
+                loadCount++;
+                if (loadCount === 3) {
+                    initFilters();
+                    filterNCPData();
+                    filterWasteData();
+                    filterAdditionalData();
+                    if (overlay) {
+                        overlay.style.opacity = '0';
+                        setTimeout(() => overlay.style.display = 'none', 300);
+                    }
+                }
+            };
+
+            // Parse NCP Data
+            Papa.parse(ncpUrl, {
                 download: true,
                 header: false,
                 skipEmptyLines: true,
                 complete: function(results) {
-                    const data = results.data;
+                    const data = results.data || [];
                     if (data.length >= 2) {
                         parsedRowsNCP = data.slice(1).map(r => ({
                             ncpShift: (r[1] || '').trim(),
@@ -694,57 +789,80 @@
                             ncpAK: parseFloat(String(r[36] || r[37] || r[38] || '').replace(/%/g, '').trim()) || 0
                         })).filter(r => r.ncpName || r.ncpDate);
                     }
-
-                    Papa.parse(DEFAULT_WASTE_URL, {
-                        download: true,
-                        header: false,
-                        skipEmptyLines: true,
-                        complete: function(wasteResults) {
-                            const wData = wasteResults.data;
-                            parsedRowsWaste = wData.slice(1).map(r => {
-                                return {
-                                    wasteDate: normalizeDateStr(r[0] || ''),
-                                    wasteStation: String(r[1] || '').trim(),
-                                    wasteShift: String(r[2] || '').trim(),
-                                    wasteMachine: String(r[3] || '').trim(),
-                                    weightE: parseFloat(String(r[4] || '0').replace(/,/g, '')) || 0,
-                                    weightF: parseFloat(String(r[5] || '0').replace(/,/g, '')) || 0
-                                };
-                            }).filter(r => r.wasteDate || r.wasteMachine || r.weightE > 0 || r.weightF > 0);
-
-                            Papa.parse(ADDITIONAL_URL, {
-                                download: true,
-                                header: false,
-                                skipEmptyLines: true,
-                                complete: function(addResults) {
-                                    const aData = addResults.data;
-                                    parsedRowsAdditional = aData.slice(1).map(r => {
-                                        return {
-                                            dateVal: normalizeDateStr(r[0] || ''),
-                                            supplierD: String(r[3] || '').trim(), 
-                                            gradeE: String(r[4] || '').trim(),    
-                                            deptK: String(r[10] || '').trim(),    
-                                            issueI: String(r[8] || '').trim(),    
-                                            lossTimeL: parseFloat(String(r[11] || '0').replace(/,/g, '')) || 0,
-                                            stopU: String(r[20] || r[21] || r[19] || '').trim(), 
-                                            shiftP: String(r[15] || '').trim(),   
-                                            countS: parseFloat(String(r[18] || '0').replace(/,/g, '')) || 1,
-                                            machineT: String(r[19] || '').trim()  
-                                        };
-                                    }).filter(r => r.dateVal || r.issueI || r.machineT);
-
-                                    initFilters();
-                                    filterNCPData();
-                                    filterWasteData();
-                                    filterAdditionalData();
-                                    overlay.style.opacity = '0';
-                                    setTimeout(() => overlay.style.display = 'none', 300);
-                                }
-                            });
-                        }
-                    });
+                    checkComplete();
+                },
+                error: function(err) {
+                    console.error("Error loading NCP CSV:", err);
+                    parsedRowsNCP = [];
+                    checkComplete();
                 }
             });
+
+            // Parse Waste Data
+            Papa.parse(wasteUrl, {
+                download: true,
+                header: false,
+                skipEmptyLines: true,
+                complete: function(wasteResults) {
+                    const wData = wasteResults.data || [];
+                    parsedRowsWaste = wData.slice(1).map(r => {
+                        return {
+                            wasteDate: normalizeDateStr(r[0] || ''),
+                            wasteStation: String(r[1] || '').trim(),
+                            wasteShift: String(r[2] || '').trim(),
+                            wasteMachine: String(r[3] || '').trim(),
+                            weightE: parseFloat(String(r[4] || '0').replace(/,/g, '')) || 0,
+                            weightF: parseFloat(String(r[5] || '0').replace(/,/g, '')) || 0
+                        };
+                    }).filter(r => r.wasteDate || r.wasteMachine || r.weightE > 0 || r.weightF > 0);
+                    checkComplete();
+                },
+                error: function(err) {
+                    console.error("Error loading Waste CSV:", err);
+                    parsedRowsWaste = [];
+                    checkComplete();
+                }
+            });
+
+            // Parse Additional Data
+            Papa.parse(addUrl, {
+                download: true,
+                header: false,
+                skipEmptyLines: true,
+                complete: function(addResults) {
+                    const aData = addResults.data || [];
+                    parsedRowsAdditional = aData.slice(1).map(r => {
+                        return {
+                            dateVal: normalizeDateStr(r[0] || ''),
+                            supplierD: String(r[3] || '').trim(), 
+                            gradeE: String(r[4] || '').trim(),    
+                            deptK: String(r[10] || '').trim(),    
+                            issueI: String(r[8] || '').trim(),    
+                            lossTimeL: parseFloat(String(r[11] || '0').replace(/,/g, '')) || 0,
+                            detailM: String(r[12] || '').trim(),    
+                            stopU: String(r[20] || r[21] || r[19] || '').trim(), 
+                            shiftP: String(r[15] || '').trim(),   
+                            countS: parseFloat(String(r[18] || '0').replace(/,/g, '')) || 1,
+                            machineT: String(r[19] || '').trim()  
+                        };
+                    }).filter(r => r.dateVal || r.issueI || r.machineT);
+                    checkComplete();
+                },
+                error: function(err) {
+                    console.error("Error loading Additional CSV:", err);
+                    parsedRowsAdditional = [];
+                    checkComplete();
+                }
+            });
+        }
+
+        function isStoppageRecord(stopVal) {
+            if (!stopVal) return false;
+            let val = String(stopVal).toLowerCase().trim();
+            if (val === 'stop' || val === 'หยุด' || val === 'หยุดเครื่อง' || val === 'y' || val === 'yes' || val === '1' || val === 'true') {
+                return true;
+            }
+            return false;
         }
 
         function initFilters() {
@@ -761,6 +879,7 @@
 
             const populateSelect = (elementId, items, defaultText = 'ทั้งหมด') => {
                 const el = document.getElementById(elementId);
+                if (!el) return;
                 const currentVal = el.value;
                 el.innerHTML = `<option value="">${defaultText}</option>`;
                 items.forEach(item => {
@@ -781,33 +900,34 @@
             populateSelect('add-shift-filter', shiftsAdd);
             populateSelect('add-dept-filter', deptsAdd);
 
-            // Populate Problem checkboxes
             const probContainer = document.getElementById('problem-checkboxes-container');
-            probContainer.innerHTML = '';
-            problemsNCP.forEach(prob => {
-                let div = document.createElement('label');
-                div.className = 'flex items-center gap-2 text-xs text-slate-700 cursor-pointer hover:bg-slate-50 p-1.5 rounded-lg transition-colors';
-                div.innerHTML = `
-                    <input type="checkbox" name="ncp-problem-checkbox" value="${prob}" checked onchange="filterNCPData()" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4">
-                    <span class="truncate" title="${prob}">${prob}</span>
-                `;
-                probContainer.appendChild(div);
-            });
+            if (probContainer) {
+                probContainer.innerHTML = '';
+                problemsNCP.forEach(prob => {
+                    let div = document.createElement('label');
+                    div.className = 'flex items-center gap-2 text-xs text-slate-700 cursor-pointer hover:bg-slate-50 p-1.5 rounded-lg transition-colors';
+                    div.innerHTML = `
+                        <input type="checkbox" name="ncp-problem-checkbox" value="${prob}" checked onchange="filterNCPData()" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4">
+                        <span class="truncate" title="${prob}">${prob}</span>
+                    `;
+                    probContainer.appendChild(div);
+                });
+            }
 
             const ncpDates = parsedRowsNCP.map(r => r.ncpDate).filter(Boolean).sort();
-            if (ncpDates.length > 0 && !document.getElementById('ncp-start-date').value) {
+            if (ncpDates.length > 0 && document.getElementById('ncp-start-date') && !document.getElementById('ncp-start-date').value) {
                 document.getElementById('ncp-start-date').value = ncpDates[0];
                 document.getElementById('ncp-end-date').value = ncpDates[ncpDates.length - 1];
             }
 
             const wasteDates = parsedRowsWaste.map(r => r.wasteDate).filter(Boolean).sort();
-            if (wasteDates.length > 0 && !document.getElementById('waste-start-date').value) {
+            if (wasteDates.length > 0 && document.getElementById('waste-start-date') && !document.getElementById('waste-start-date').value) {
                 document.getElementById('waste-start-date').value = wasteDates[0];
                 document.getElementById('waste-end-date').value = wasteDates[wasteDates.length - 1];
             }
 
             const addDates = parsedRowsAdditional.map(r => r.dateVal).filter(Boolean).sort();
-            if (addDates.length > 0 && !document.getElementById('add-start-date').value) {
+            if (addDates.length > 0 && document.getElementById('add-start-date') && !document.getElementById('add-start-date').value) {
                 document.getElementById('add-start-date').value = addDates[0];
                 if (!document.getElementById('add-end-date').value) {
                     document.getElementById('add-end-date').value = '2026-12-31';
@@ -817,7 +937,7 @@
 
         function toggleProblemDropdown() {
             const menu = document.getElementById('problem-dropdown-menu');
-            menu.classList.toggle('hidden');
+            if (menu) menu.classList.toggle('hidden');
         }
 
         window.addEventListener('click', function(e) {
@@ -838,6 +958,7 @@
             const checkboxes = document.querySelectorAll('input[name="ncp-problem-checkbox"]');
             const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
             const labelEl = document.getElementById('problem-dropdown-label');
+            if (!labelEl) return;
             if (checkedCount === 0) {
                 labelEl.textContent = 'ไม่ได้เลือก (ไม่มีข้อมูล)';
             } else if (checkedCount === checkboxes.length) {
@@ -878,10 +999,12 @@
             currentView = v;
             ['daily', 'weekly', 'monthly'].forEach(mode => {
                 const btn = document.getElementById(`btn-${mode}`);
-                if (mode === v) {
-                    btn.className = 'px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow-sm transition-all';
-                } else {
-                    btn.className = 'px-3.5 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all';
+                if (btn) {
+                    if (mode === v) {
+                        btn.className = 'px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow-sm transition-all';
+                    } else {
+                        btn.className = 'px-3.5 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all';
+                    }
                 }
             });
             renderNCPChart(currentFilteredNCP);
@@ -891,10 +1014,12 @@
             currentWasteView = v;
             ['daily', 'weekly', 'monthly'].forEach(mode => {
                 const btn = document.getElementById(`waste-btn-${mode}`);
-                if (mode === v) {
-                    btn.className = 'px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow-sm transition-all';
-                } else {
-                    btn.className = 'px-3.5 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all';
+                if (btn) {
+                    if (mode === v) {
+                        btn.className = 'px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow-sm transition-all';
+                    } else {
+                        btn.className = 'px-3.5 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all';
+                    }
                 }
             });
             renderWasteShiftChart(currentFilteredWaste);
@@ -904,20 +1029,22 @@
             currentAddView = v;
             ['daily', 'weekly', 'monthly'].forEach(mode => {
                 const btn = document.getElementById(`add-btn-${mode}`);
-                if (mode === v) {
-                    btn.className = 'px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow-sm transition-all';
-                } else {
-                    btn.className = 'px-3.5 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all';
+                if (btn) {
+                    if (mode === v) {
+                        btn.className = 'px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow-sm transition-all';
+                    } else {
+                        btn.className = 'px-3.5 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all';
+                    }
                 }
             });
             renderAddTrendChart(currentFilteredAdditional);
         }
 
         function filterNCPData() {
-            const startDate = document.getElementById('ncp-start-date').value;
-            const endDate = document.getElementById('ncp-end-date').value;
-            const machine = document.getElementById('ncp-machine-filter').value;
-            const shift = document.getElementById('ncp-shift-filter').value;
+            const startDate = document.getElementById('ncp-start-date') ? document.getElementById('ncp-start-date').value : '';
+            const endDate = document.getElementById('ncp-end-date') ? document.getElementById('ncp-end-date').value : '';
+            const machine = document.getElementById('ncp-machine-filter') ? document.getElementById('ncp-machine-filter').value : '';
+            const shift = document.getElementById('ncp-shift-filter') ? document.getElementById('ncp-shift-filter').value : '';
 
             const selectedProblems = Array.from(document.querySelectorAll('input[name="ncp-problem-checkbox"]:checked')).map(cb => cb.value);
             updateProblemDropdownLabel();
@@ -931,10 +1058,6 @@
                 let prob = (r.ncpProblemU || '').trim();
                 if (prob && prob !== '-' && prob.toLowerCase() !== 'nan') {
                     if (!selectedProblems.includes(prob)) return false;
-                } else {
-                    if (!selectedProblems.includes('')) {
-                        // check if any problem matches
-                    }
                 }
                 return true;
             });
@@ -946,7 +1069,9 @@
         }
 
         function renderNCPChart(data) {
-            const ctx = document.getElementById('ncpChart').getContext('2d');
+            const canvasEl = document.getElementById('ncpChart');
+            if (!canvasEl) return;
+            const ctx = canvasEl.getContext('2d');
             let persons = [...new Set(data.map(r => r.ncpName).filter(Boolean))].sort();
             let timeLabels = [...new Set(data.map(r => getGroupKey(r.ncpDate, currentView)).filter(Boolean))].sort();
 
@@ -996,6 +1121,16 @@
                             grid: { color: '#f1f5f9' },
                             grace: '15%'
                         }
+                    },
+                    onClick: function(event, elements) {
+                        if (elements.length > 0) {
+                            let element = elements[0];
+                            let datasetIndex = element.datasetIndex;
+                            let timeIndex = element.index;
+                            let personName = this.data.datasets[datasetIndex].label;
+                            let tLabel = this.data.labels[timeIndex];
+                            openDetailByPersonAndTimeModal(personName, tLabel, currentView);
+                        }
                     }
                 },
                 plugins: [{
@@ -1023,8 +1158,10 @@
         }
 
         function renderNCPTop10PersonChart(data) {
-            const ctx = document.getElementById('ncpTop10PersonChart').getContext('2d');
-            const selectedPerson = document.getElementById('ncp-top10-person-select').value;
+            const canvasEl = document.getElementById('ncpTop10PersonChart');
+            if (!canvasEl) return;
+            const ctx = canvasEl.getContext('2d');
+            const selectedPerson = document.getElementById('ncp-top10-person-select') ? document.getElementById('ncp-top10-person-select').value : '';
 
             let targetRows = data;
             if (selectedPerson) {
@@ -1094,6 +1231,14 @@
                                 }
                             } 
                         }
+                    },
+                    onClick: function(event, elements) {
+                        if (elements.length > 0) {
+                            let element = elements[0];
+                            let index = element.index;
+                            let probName = labels[index];
+                            openDetailByProblemModal(probName, selectedPerson);
+                        }
                     }
                 },
                 plugins: [{
@@ -1122,9 +1267,11 @@
 
         function renderNCPCards(data) {
             const container = document.getElementById('ncp-cards-container');
+            if (!container) return;
             container.innerHTML = '';
             let persons = [...new Set(data.map(r => r.ncpName).filter(Boolean))].sort();
-            document.getElementById('ncp-person-count').textContent = `${persons.length} บุคลากร`;
+            const countEl = document.getElementById('ncp-person-count');
+            if (countEl) countEl.textContent = `${persons.length} บุคลากร`;
 
             if (persons.length === 0) {
                 container.innerHTML = `<div class="col-span-full bg-white rounded-2xl p-8 text-center border border-slate-200"><p class="text-slate-400 text-sm">ไม่พบข้อมูลตามเงื่อนไขที่เลือก</p></div>`;
@@ -1135,7 +1282,6 @@
                 let pRows = data.filter(r => r.ncpName === person);
                 let overRows = pRows.filter(r => r.ncpOver > 2);
                 let normalRows = pRows.filter(r => r.ncpOver <= 2);
-                let excess50Rows = pRows.filter(r => r.ncpAK > 50 || (parseFloat(r.ncpLoss) > 0 && parseFloat(r.ncpOutput) > 0 && (parseFloat(r.ncpLoss) / parseFloat(r.ncpOutput)) > 0.5));
 
                 let totalOutput = pRows.reduce((sum, r) => sum + (parseFloat(r.ncpOutput) || 0), 0);
                 let totalLoss = pRows.reduce((sum, r) => sum + (parseFloat(r.ncpLoss) || 0), 0);
@@ -1158,7 +1304,8 @@
                 })).sort((a, b) => b.weight - a.weight).slice(0, 5);
 
                 let card = document.createElement('div');
-                card.className = 'bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 hover:shadow-md transition-all flex flex-col justify-between';
+                card.className = 'bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 hover:shadow-md transition-all flex flex-col justify-between cursor-pointer';
+                card.onclick = () => openDetailModal(person, 'all');
                 
                 let problemsHtml = '';
                 if (sortedProblems.length === 0) {
@@ -1196,14 +1343,14 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-3 gap-2 mb-4">
+                        <div class="grid grid-cols-3 gap-2 mb-4" onclick="event.stopPropagation()">
                             <div onclick="openDetailModal('${person}', 'over2')" class="bg-amber-50/70 border border-amber-200 p-2 rounded-xl text-center cursor-pointer hover:bg-amber-100 transition-all">
                                 <p class="text-[10px] font-semibold text-amber-800">เกิน 2 พาเลท</p>
                                 <p class="text-base font-bold text-amber-700 mt-0.5">${overRows.length}</p>
                             </div>
                             <div onclick="openDetailModal('${person}', 'excess50')" class="bg-red-50/70 border border-red-200 p-2 rounded-xl text-center cursor-pointer hover:bg-red-100 transition-all">
                                 <p class="text-[10px] font-semibold text-red-800">ของเสีย > 50%</p>
-                                <p class="text-base font-bold text-red-700 mt-0.5">${excess50Rows.length}</p>
+                                <p class="text-base font-bold text-red-700 mt-0.5">${pRows.filter(r => r.ncpAK > 50 || (parseFloat(r.ncpLoss) > 0 && parseFloat(r.ncpOutput) > 0 && (parseFloat(r.ncpLoss) / parseFloat(r.ncpOutput)) > 0.5)).length}</p>
                             </div>
                             <div onclick="openDetailModal('${person}', 'normal')" class="bg-emerald-50/70 border border-emerald-200 p-2 rounded-xl text-center cursor-pointer hover:bg-emerald-100 transition-all">
                                 <p class="text-[10px] font-semibold text-emerald-800">ปกติ (≤ 2)</p>
@@ -1221,8 +1368,8 @@
                         </div>
                     </div>
                     <div class="pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
-                        <span class="text-slate-400">คลิกที่กล่องตัวเลขเพื่อดูรายละเอียด</span>
-                        <span onclick="openDetailModal('${person}', 'all')" class="font-semibold text-indigo-600 hover:underline cursor-pointer">ดูประวัติทั้งหมด →</span>
+                        <span class="text-slate-400">คลิกที่การ์ดเพื่อดูรายละเอียดทั้งหมด</span>
+                        <span class="font-semibold text-indigo-600 hover:underline">ดูประวัติทั้งหมด →</span>
                     </div>
                 `;
                 container.appendChild(card);
@@ -1231,10 +1378,12 @@
 
         function renderNCPExcessTable(data) {
             const tbody = document.getElementById('ncp-excess-table-body');
+            if (!tbody) return;
             tbody.innerHTML = '';
             
             let excessRows = data.filter(r => r.ncpAK > 50 || (parseFloat(r.ncpLoss) > 0 && parseFloat(r.ncpOutput) > 0 && (parseFloat(r.ncpLoss) / parseFloat(r.ncpOutput)) > 0.5));
-            document.getElementById('ncp-excess-count').textContent = `${excessRows.length} รายการ`;
+            const countEl = document.getElementById('ncp-excess-count');
+            if (countEl) countEl.textContent = `${excessRows.length} รายการ`;
 
             if (excessRows.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400">ไม่พบรายการที่ของเสียเกิน 50% ตามเงื่อนไข</td></tr>`;
@@ -1247,7 +1396,8 @@
                 let ratio = outVal > 0 ? ((lossVal / outVal) * 100).toFixed(1) : (r.ncpAK > 0 ? r.ncpAK : 0);
 
                 let tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50 transition-colors';
+                tr.className = 'hover:bg-slate-50 transition-colors cursor-pointer';
+                tr.onclick = () => openDetailBySingleRowModal(r);
                 tr.innerHTML = `
                     <td class="p-3.5 text-slate-700">${formatDateToDisplay(r.ncpDate)}</td>
                     <td class="p-3.5 font-medium text-slate-800">${r.ncpName || '-'}</td>
@@ -1263,564 +1413,21 @@
             });
         }
 
-        function filterAdditionalData() {
-            const startDate = document.getElementById('add-start-date').value;
-            const endDate = document.getElementById('add-end-date').value;
-            const dept = document.getElementById('add-dept-filter').value;
-            const machine = document.getElementById('add-machine-filter').value;
-            const shift = document.getElementById('add-shift-filter').value;
-
-            currentFilteredAdditional = parsedRowsAdditional.filter(r => {
-                if (startDate && r.dateVal && r.dateVal < startDate) return false;
-                if (endDate && r.dateVal && r.dateVal > endDate) return false;
-                if (dept && r.deptK !== dept) return false;
-                if (machine && r.machineT !== machine) return false;
-                if (shift && r.shiftP !== shift) return false;
-                return true;
-            });
-
-            let totalLossMinsSum = currentFilteredAdditional.reduce((sum, r) => sum + (r.lossTimeL || 0), 0);
-            document.getElementById('add-total-loss-time').textContent = formatMinutesToHM(totalLossMinsSum);
-            let totalIssuesCount = currentFilteredAdditional.reduce((sum, r) => sum + r.countS, 0);
-            document.getElementById('add-total-issues').textContent = totalIssuesCount.toLocaleString();
-
-            renderAddTrendChart(currentFilteredAdditional);
-            renderSupplierPieChart(currentFilteredAdditional);
-            renderGradeBarChart(currentFilteredAdditional);
-            renderAdditionalShiftCards(currentFilteredAdditional);
-        }
-
-        function renderAddTrendChart(data) {
-            const ctx = document.getElementById('addTrendChart').getContext('2d');
-            let timeLabels = [...new Set(data.map(r => getGroupKey(r.dateVal, currentAddView)).filter(Boolean))].sort();
-
-            let countsByTime = timeLabels.map(tLabel => {
-                let tRows = data.filter(r => getGroupKey(r.dateVal, currentAddView) === tLabel);
-                return tRows.reduce((sum, r) => sum + r.countS, 0);
-            });
-
-            if (addTrendChartInstance) addTrendChartInstance.destroy();
-            addTrendChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: timeLabels.length > 0 ? timeLabels : ['ไม่มีข้อมูล'],
-                    datasets: [{
-                        label: 'จำนวนครั้งปัญหาม้วน',
-                        data: countsByTime.length > 0 ? countsByTime : [0],
-                        borderColor: '#6366f1',
-                        backgroundColor: '#6366f1',
-                        borderWidth: 2.5,
-                        tension: 0.2,
-                        fill: false,
-                        pointRadius: 4,
-                        pointHoverRadius: 7
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { family: 'Prompt', size: 12 } } },
-                        tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: { family: 'Prompt' }, bodyFont: { family: 'Prompt' }, padding: 12 }
-                    },
-                    scales: {
-                        x: { grid: { display: false }, ticks: { font: { family: 'Prompt' } } },
-                        y: { beginAtZero: true, ticks: { precision: 0, font: { family: 'Prompt' } }, grid: { color: '#f1f5f9' } }
-                    }
-                },
-                plugins: [{
-                    id: 'customAddDataLabels',
-                    afterDatasetsDraw(chart) {
-                        const { ctx } = chart;
-                        chart.data.datasets.forEach((dataset, datasetIndex) => {
-                            const meta = chart.getDatasetMeta(datasetIndex);
-                            if (!meta.hidden) {
-                                meta.data.forEach((element, index) => {
-                                    const value = dataset.data[index];
-                                    if (value !== undefined && value !== null) {
-                                        ctx.fillStyle = '#475569';
-                                        ctx.font = '10px Prompt, sans-serif';
-                                        ctx.textAlign = 'center';
-                                        ctx.textBaseline = 'bottom';
-                                        ctx.fillText(Math.round(value), element.x, element.y - 6);
-                                    }
-                                });
-                            }
-                        });
-                    }
-                }]
-            });
-        }
-
-        function renderSupplierPieChart(data) {
-            const ctx = document.getElementById('supplierPieChart').getContext('2d');
-            
-            let supplierMap = {};
-            data.forEach(r => {
-                let supp = r.supplierD ? r.supplierD.trim() : 'ไม่ระบุ Supplier';
-                if (!supp || supp === '-' || supp.toLowerCase() === 'nan') supp = 'ไม่ระบุ Supplier';
-                supplierMap[supp] = (supplierMap[supp] || 0) + r.countS;
-            });
-
-            let sortedSuppliers = Object.keys(supplierMap).map(supp => ({
-                supplier: supp,
-                count: supplierMap[supp]
-            })).sort((a, b) => b.count - a.count);
-
-            let labels = sortedSuppliers.map(item => item.supplier);
-            let counts = sortedSuppliers.map(item => item.count);
-
-            const colorPalette = [
-                '#6366f1', '#ef4444', '#10b981', '#f59e0b', '#3b82f6', 
-                '#ec4899', '#8b5cf6', '#14b8a6', '#f97316', '#06b6d4', '#84cc16'
-            ];
-
-            if (supplierPieChartInstance) supplierPieChartInstance.destroy();
-            supplierPieChartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels.length > 0 ? labels : ['ไม่มีข้อมูล'],
-                    datasets: [{
-                        data: counts.length > 0 ? counts : [0],
-                        backgroundColor: colorPalette,
-                        borderWidth: 2,
-                        borderColor: '#ffffff'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { family: 'Prompt', size: 10 } } },
-                        tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: { family: 'Prompt' }, bodyFont: { family: 'Prompt' }, padding: 12 }
-                    },
-                    onClick: function(event, elements) {
-                        if (elements.length > 0) {
-                            let index = elements[0].index;
-                            let supplierName = labels[index];
-                            openSupplierDetailModal(supplierName);
-                        }
-                    }
-                }
-            });
-        }
-
-        function renderGradeBarChart(data) {
-            const ctx = document.getElementById('gradeBarChart').getContext('2d');
-            
-            let gradeMap = {};
-            data.forEach(r => {
-                let grade = r.gradeE ? r.gradeE.trim() : 'ไม่ระบุเกรดแกรม';
-                if (!grade || grade === '-' || grade.toLowerCase() === 'nan') grade = 'ไม่ระบุเกรดแกรม';
-                gradeMap[grade] = (gradeMap[grade] || 0) + r.countS;
-            });
-
-            let sortedGrades = Object.keys(gradeMap).map(g => ({
-                grade: g,
-                count: gradeMap[g]
-            })).sort((a, b) => b.count - a.count).slice(0, 12);
-
-            let labels = sortedGrades.map(item => item.grade);
-            let counts = sortedGrades.map(item => item.count);
-
-            if (gradeBarChartInstance) gradeBarChartInstance.destroy();
-            gradeBarChartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels.length > 0 ? labels : ['ไม่มีข้อมูล'],
-                    datasets: [{
-                        label: 'จำนวนครั้งปัญหาม้วน',
-                        data: counts.length > 0 ? counts : [0],
-                        backgroundColor: '#4f46e5',
-                        borderRadius: 8,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: { family: 'Prompt' }, bodyFont: { family: 'Prompt' }, padding: 12 }
-                    },
-                    scales: {
-                        x: { grid: { display: false }, ticks: { font: { family: 'Prompt', size: 10 }, maxRotation: 25, minRotation: 0 } },
-                        y: { beginAtZero: true, ticks: { precision: 0, font: { family: 'Prompt' } }, grid: { color: '#f1f5f9' } }
-                    },
-                    onClick: function(event, elements) {
-                        if (elements.length > 0) {
-                            let index = elements[0].index;
-                            let gradeName = labels[index];
-                            openGradeDetailModal(gradeName);
-                        }
-                    }
-                }
-            });
-        }
-
-        function openSupplierDetailModal(supplierName) {
+        function openDetailModal(personName, filterType) {
             const modal = document.getElementById('detail-modal');
             const titleEl = document.getElementById('modal-title');
             const subtitleEl = document.getElementById('modal-subtitle');
             const headerTr = document.getElementById('modal-table-header');
             const tbody = document.getElementById('modal-table-body');
             
+            if (!headerTr || !tbody) return;
+
             headerTr.innerHTML = `
                 <th class="p-3 font-semibold">วันที่</th>
-                <th class="p-3 font-semibold">หน่วยงาน</th>
-                <th class="p-3 font-semibold">Supplier</th>
-                <th class="p-3 font-semibold">เกรดแกรม</th>
-                <th class="p-3 font-semibold">เครื่องจักร</th>
-                <th class="p-3 font-semibold">กะ</th>
-                <th class="p-3 font-semibold">ปัญหาที่พบ (ม้วน)</th>
-                <th class="p-3 font-semibold text-right">เวลาสูญเสีย</th>
-                <th class="p-3 font-semibold text-right">จำนวนครั้ง</th>
-            `;
-            tbody.innerHTML = '';
-
-            let targetRows = currentFilteredAdditional.filter(r => {
-                let supp = r.supplierD ? r.supplierD.trim() : 'ไม่ระบุ Supplier';
-                if (!supp || supp === '-' || supp.toLowerCase() === 'nan') supp = 'ไม่ระบุ Supplier';
-                return supp === supplierName;
-            });
-
-            titleEl.textContent = `รายละเอียดปัญหาของ Supplier: ${supplierName}`;
-            subtitleEl.textContent = `พบรายการทั้งหมด ${targetRows.length} รายการ`;
-
-            if (targetRows.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">ไม่พบรายการข้อมูล</td></tr>`;
-            } else {
-                targetRows.forEach(r => {
-                    let tr = document.createElement('tr');
-                    tr.className = 'hover:bg-slate-50 transition-colors';
-                    tr.innerHTML = `
-                        <td class="p-3 text-slate-700">${formatDateToDisplay(r.dateVal)}</td>
-                        <td class="p-3 text-slate-700">${r.deptK || '-'}</td>
-                        <td class="p-3 text-slate-700 font-medium text-indigo-900">${r.supplierD || '-'}</td>
-                        <td class="p-3 text-slate-700 font-medium text-indigo-700">${r.gradeE || '-'}</td>
-                        <td class="p-3 text-slate-700">${r.machineT || '-'}</td>
-                        <td class="p-3 text-slate-700">${r.shiftP || '-'}</td>
-                        <td class="p-3 font-medium text-slate-800">${r.issueI || '-'}</td>
-                        <td class="p-3 text-right font-semibold text-amber-600">${r.lossTimeL > 0 ? formatMinutesToHM(r.lossTimeL) : '-'}</td>
-                        <td class="p-3 text-right font-bold text-indigo-600">${r.countS.toLocaleString()}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }
-
-            modal.classList.remove('hidden');
-        }
-
-        function openGradeDetailModal(gradeName) {
-            const modal = document.getElementById('detail-modal');
-            const titleEl = document.getElementById('modal-title');
-            const subtitleEl = document.getElementById('modal-subtitle');
-            const headerTr = document.getElementById('modal-table-header');
-            const tbody = document.getElementById('modal-table-body');
-            
-            headerTr.innerHTML = `
-                <th class="p-3 font-semibold">วันที่</th>
-                <th class="p-3 font-semibold">หน่วยงาน</th>
-                <th class="p-3 font-semibold">Supplier</th>
-                <th class="p-3 font-semibold">เกรดแกรม</th>
-                <th class="p-3 font-semibold">เครื่องจักร</th>
-                <th class="p-3 font-semibold">กะ</th>
-                <th class="p-3 font-semibold">ปัญหาที่พบ (ม้วน)</th>
-                <th class="p-3 font-semibold text-right">เวลาสูญเสีย</th>
-                <th class="p-3 font-semibold text-right">จำนวนครั้ง</th>
-            `;
-            tbody.innerHTML = '';
-
-            let targetRows = currentFilteredAdditional.filter(r => {
-                let grade = r.gradeE ? r.gradeE.trim() : 'ไม่ระบุเกรดแกรม';
-                if (!grade || grade === '-' || grade.toLowerCase() === 'nan') grade = 'ไม่ระบุเกรดแกรม';
-                return grade === gradeName;
-            });
-
-            titleEl.textContent = `รายละเอียดปัญหาของเกรดแกรม: ${gradeName}`;
-            subtitleEl.textContent = `พบรายการทั้งหมด ${targetRows.length} รายการ`;
-
-            if (targetRows.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">ไม่พบรายการข้อมูล</td></tr>`;
-            } else {
-                targetRows.forEach(r => {
-                    let tr = document.createElement('tr');
-                    tr.className = 'hover:bg-slate-50 transition-colors';
-                    tr.innerHTML = `
-                        <td class="p-3 text-slate-700">${formatDateToDisplay(r.dateVal)}</td>
-                        <td class="p-3 text-slate-700">${r.deptK || '-'}</td>
-                        <td class="p-3 text-slate-700 font-medium text-indigo-900">${r.supplierD || '-'}</td>
-                        <td class="p-3 text-slate-700 font-medium text-indigo-700">${r.gradeE || '-'}</td>
-                        <td class="p-3 text-slate-700">${r.machineT || '-'}</td>
-                        <td class="p-3 text-slate-700">${r.shiftP || '-'}</td>
-                        <td class="p-3 font-medium text-slate-800">${r.issueI || '-'}</td>
-                        <td class="p-3 text-right font-semibold text-amber-600">${r.lossTimeL > 0 ? formatMinutesToHM(r.lossTimeL) : '-'}</td>
-                        <td class="p-3 text-right font-bold text-indigo-600">${r.countS.toLocaleString()}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }
-
-            modal.classList.remove('hidden');
-        }
-
-        function isStoppageRecord(stopVal) {
-            if (!stopVal) return false;
-            let val = String(stopVal).trim().toLowerCase();
-            if (val === 'หยุดเครื่อง' || val === 'stop' || val === 'yes' || val === '1' || val === 'true' || val === 'หยุด') {
-                return true;
-            }
-            if (val.includes('หยุด') && !val.includes('ไม่หยุด')) {
-                return true;
-            }
-            return false;
-        }
-
-        function renderAdditionalShiftCards(data) {
-            const container = document.getElementById('add-shift-cards-container');
-            container.innerHTML = '';
-            
-            let groups = {};
-            data.forEach(r => {
-                let shift = r.shiftP ? r.shiftP.trim() : '';
-                let dept = r.deptK ? r.deptK.trim() : 'ไม่ระบุหน่วยงาน';
-                
-                if (!shift || shift === 'ไม่ระบุ' || shift === '-' || shift.toLowerCase() === 'nan') return;
-
-                let key = `${shift}___${dept}`;
-                if (!groups[key]) {
-                    groups[key] = { shift, dept, rows: [] };
-                }
-                groups[key].rows.push(r);
-            });
-
-            let groupKeys = Object.keys(groups).sort();
-            document.getElementById('add-shift-count').textContent = `${groupKeys.length} กลุ่ม (กะ/หน่วยงาน)`;
-
-            if (groupKeys.length === 0) {
-                container.innerHTML = `<div class="col-span-full bg-white rounded-2xl p-8 text-center border border-slate-200"><p class="text-slate-400 text-sm">ไม่พบข้อมูลตามเงื่อนไขที่เลือก</p></div>`;
-                return;
-            }
-
-            groupKeys.forEach(key => {
-                let g = groups[key];
-                let shift = g.shift;
-                let dept = g.dept;
-                let sRows = g.rows;
-
-                let totalCount = sRows.reduce((sum, r) => sum + r.countS, 0);
-                let totalLossTime = sRows.reduce((sum, r) => sum + r.lossTimeL, 0);
-
-                let stopRows = sRows.filter(r => isStoppageRecord(r.stopU));
-                let nonStopRows = sRows.filter(r => !isStoppageRecord(r.stopU));
-
-                let stopCount = stopRows.reduce((sum, r) => sum + r.countS, 0);
-                let nonStopCount = nonStopRows.reduce((sum, r) => sum + r.countS, 0);
-
-                let getTopIssues = (rowsList) => {
-                    let map = {};
-                    rowsList.forEach(r => {
-                        let issue = r.issueI || 'ไม่ระบุปัญหา';
-                        map[issue] = (map[issue] || 0) + r.countS;
-                    });
-                    return Object.keys(map).map(issue => ({
-                        issue: issue,
-                        count: map[issue]
-                    })).sort((a, b) => b.count - a.count).slice(0, 3);
-                };
-
-                let stopIssues = getTopIssues(stopRows);
-                let nonStopIssues = getTopIssues(nonStopRows);
-
-                let renderIssueList = (issuesList) => {
-                    if (issuesList.length === 0) {
-                        return `<li class="text-slate-400 text-xs py-0.5">- ไม่มีรายการ -</li>`;
-                    }
-                    let html = '';
-                    issuesList.forEach((item, idx) => {
-                        html += `<li class="flex justify-between items-center text-xs py-0.5 border-b border-slate-100 last:border-0"><span class="text-slate-700 truncate pr-2" title="${item.issue}">${idx + 1}. ${item.issue}</span><span class="font-semibold text-indigo-600 whitespace-nowrap">${item.count.toLocaleString()} ครั้ง</span></li>`;
-                    });
-                    return html;
-                };
-
-                let card = document.createElement('div');
-                card.className = 'bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 hover:shadow-md transition-all flex flex-col justify-between';
-                card.innerHTML = `
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
-                                <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm font-semibold">กะ</span>
-                                กะ ${shift}
-                            </h3>
-                            <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg font-medium">${sRows.length} รายการ</span>
-                        </div>
-                        <div class="mb-3">
-                            <span class="inline-block px-2.5 py-1 bg-indigo-50 text-indigo-700 text-xs font-semibold rounded-lg border border-indigo-100">หน่วยงาน: ${dept}</span>
-                        </div>
-                        
-                        <div class="grid grid-cols-3 gap-2 mb-3">
-                            <div onclick="openStoppageDetailModal('${shift}', '${dept}', 'stop')" class="bg-red-50/70 border border-red-200 p-2.5 rounded-xl text-center cursor-pointer hover:bg-red-100 transition-all">
-                                <p class="text-[10px] font-semibold text-red-800">หยุดเครื่อง</p>
-                                <p class="text-base font-bold text-red-700 mt-0.5">${stopCount.toLocaleString()} ครั้ง</p>
-                            </div>
-                            <div onclick="openStoppageDetailModal('${shift}', '${dept}', 'nonstop')" class="bg-emerald-50/70 border border-emerald-200 p-2.5 rounded-xl text-center cursor-pointer hover:bg-emerald-100 transition-all">
-                                <p class="text-[10px] font-semibold text-emerald-800">ไม่หยุดเครื่อง</p>
-                                <p class="text-base font-bold text-emerald-700 mt-0.5">${nonStopCount.toLocaleString()} ครั้ง</p>
-                            </div>
-                            <div class="bg-amber-50/70 border border-amber-200 p-2.5 rounded-xl text-center">
-                                <p class="text-[10px] font-semibold text-amber-800">เวลาสูญเสีย</p>
-                                <p class="text-xs font-bold text-amber-700 mt-1">${formatMinutesToHM(totalLossTime)}</p>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 gap-2.5 mb-3">
-                            <div class="bg-red-50/30 border border-red-100 rounded-xl p-2">
-                                <p class="text-[11px] font-bold text-red-800 mb-1 flex items-center gap-1">
-                                    <span>⚠️</span> ปัญหาที่พบบ่อย (หยุดเครื่อง)
-                                </p>
-                                <ul class="space-y-0.5">
-                                    ${renderIssueList(stopIssues)}
-                                </ul>
-                            </div>
-                            <div class="bg-emerald-50/30 border border-emerald-100 rounded-xl p-2">
-                                <p class="text-[11px] font-bold text-emerald-800 mb-1 flex items-center gap-1">
-                                    <span>🛡️</span> ปัญหาที่พบบ่อย (ไม่หยุดเครื่อง)
-                                </p>
-                                <ul class="space-y-0.5">
-                                    ${renderIssueList(nonStopIssues)}
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
-                        <span class="text-slate-400">เวลาสูญเสียรวม: ${formatMinutesToHM(totalLossTime)}</span>
-                        <span onclick="openAdditionalDetailModal('${shift}', '${dept}')" class="font-semibold text-indigo-600 hover:underline cursor-pointer">ดูทั้งหมด →</span>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function openStoppageDetailModal(shiftName, deptName, type) {
-            const modal = document.getElementById('detail-modal');
-            const titleEl = document.getElementById('modal-title');
-            const subtitleEl = document.getElementById('modal-subtitle');
-            const headerTr = document.getElementById('modal-table-header');
-            const tbody = document.getElementById('modal-table-body');
-            
-            headerTr.innerHTML = `
-                <th class="p-3 font-semibold">วันที่</th>
-                <th class="p-3 font-semibold">หน่วยงาน</th>
-                <th class="p-3 font-semibold">Supplier</th>
-                <th class="p-3 font-semibold">เกรดแกรม</th>
-                <th class="p-3 font-semibold">เครื่องจักร</th>
-                <th class="p-3 font-semibold">กะ</th>
-                <th class="p-3 font-semibold">ปัญหาที่พบ (ม้วน)</th>
-                <th class="p-3 font-semibold text-right">เวลาสูญเสีย</th>
-                <th class="p-3 font-semibold text-right">จำนวนครั้ง</th>
-            `;
-            tbody.innerHTML = '';
-
-            let sRows = currentFilteredAdditional.filter(r => r.shiftP === shiftName && r.deptK === deptName);
-            let targetRows = sRows.filter(r => {
-                let isStop = isStoppageRecord(r.stopU);
-                return type === 'stop' ? isStop : !isStop;
-            });
-
-            titleEl.textContent = `รายละเอียดปัญหา (${type === 'stop' ? 'หยุดเครื่อง' : 'ไม่หยุดเครื่อง'}): กะ ${shiftName} | หน่วยงาน ${deptName}`;
-            subtitleEl.textContent = `พบรายการทั้งหมด ${targetRows.length} รายการ`;
-
-            if (targetRows.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">ไม่พบรายการข้อมูล</td></tr>`;
-            } else {
-                targetRows.forEach(r => {
-                    let tr = document.createElement('tr');
-                    tr.className = 'hover:bg-slate-50 transition-colors';
-                    tr.innerHTML = `
-                        <td class="p-3 text-slate-700">${formatDateToDisplay(r.dateVal)}</td>
-                        <td class="p-3 text-slate-700">${r.deptK || '-'}</td>
-                        <td class="p-3 text-slate-700 font-medium text-indigo-900">${r.supplierD || '-'}</td>
-                        <td class="p-3 text-slate-700 font-medium text-indigo-700">${r.gradeE || '-'}</td>
-                        <td class="p-3 text-slate-700">${r.machineT || '-'}</td>
-                        <td class="p-3 text-slate-700">${r.shiftP || '-'}</td>
-                        <td class="p-3 font-medium text-slate-800">${r.issueI || '-'}</td>
-                        <td class="p-3 text-right font-semibold text-amber-600">${r.lossTimeL > 0 ? formatMinutesToHM(r.lossTimeL) : '-'}</td>
-                        <td class="p-3 text-right font-bold text-indigo-600">${r.countS.toLocaleString()}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }
-
-            modal.classList.remove('hidden');
-        }
-
-        function openAdditionalDetailModal(shiftName, deptName) {
-            const modal = document.getElementById('detail-modal');
-            const titleEl = document.getElementById('modal-title');
-            const subtitleEl = document.getElementById('modal-subtitle');
-            const headerTr = document.getElementById('modal-table-header');
-            const tbody = document.getElementById('modal-table-body');
-            
-            headerTr.innerHTML = `
-                <th class="p-3 font-semibold">วันที่</th>
-                <th class="p-3 font-semibold">หน่วยงาน</th>
-                <th class="p-3 font-semibold">Supplier</th>
-                <th class="p-3 font-semibold">เกรดแกรม</th>
-                <th class="p-3 font-semibold">เครื่องจักร</th>
-                <th class="p-3 font-semibold">กะ</th>
-                <th class="p-3 font-semibold">ปัญหาที่พบ (ม้วน)</th>
-                <th class="p-3 font-semibold">สถานะการหยุดเครื่อง</th>
-                <th class="p-3 font-semibold text-right">เวลาสูญเสีย</th>
-                <th class="p-3 font-semibold text-right">จำนวนครั้ง</th>
-            `;
-            tbody.innerHTML = '';
-
-            let targetRows = currentFilteredAdditional.filter(r => r.shiftP === shiftName && r.deptK === deptName);
-
-            titleEl.textContent = `รายละเอียดปัญหาม้วน: กะ ${shiftName} | หน่วยงาน ${deptName}`;
-            subtitleEl.textContent = `พบรายการทั้งหมด ${targetRows.length} รายการ`;
-
-            if (targetRows.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="10" class="p-6 text-center text-slate-400">ไม่พบรายการข้อมูล</td></tr>`;
-            } else {
-                targetRows.forEach(r => {
-                    let isStop = isStoppageRecord(r.stopU);
-                    let stopLabel = isStop ? 'หยุดเครื่อง' : 'ไม่หยุดเครื่อง';
-                    
-                    let tr = document.createElement('tr');
-                    tr.className = 'hover:bg-slate-50 transition-colors';
-                    tr.innerHTML = `
-                        <td class="p-3 text-slate-700">${formatDateToDisplay(r.dateVal)}</td>
-                        <td class="p-3 text-slate-700">${r.deptK || '-'}</td>
-                        <td class="p-3 text-slate-700 font-medium text-indigo-900">${r.supplierD || '-'}</td>
-                        <td class="p-3 text-slate-700 font-medium text-indigo-700">${r.gradeE || '-'}</td>
-                        <td class="p-3 text-slate-700">${r.machineT || '-'}</td>
-                        <td class="p-3 text-slate-700">${r.shiftP || '-'}</td>
-                        <td class="p-3 font-medium text-slate-800">${r.issueI || '-'}</td>
-                        <td class="p-3 text-slate-700"><span class="px-2 py-0.5 rounded-full text-xs font-semibold ${isStop ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}">${stopLabel}</span></td>
-                        <td class="p-3 text-right font-semibold text-amber-600">${r.lossTimeL > 0 ? formatMinutesToHM(r.lossTimeL) : '-'}</td>
-                        <td class="p-3 text-right font-bold text-indigo-600">${r.countS.toLocaleString()}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }
-
-            modal.classList.remove('hidden');
-        }
-
-        function openDetailModal(personName, type) {
-            const modal = document.getElementById('detail-modal');
-            const titleEl = document.getElementById('modal-title');
-            const subtitleEl = document.getElementById('modal-subtitle');
-            const headerTr = document.getElementById('modal-table-header');
-            const tbody = document.getElementById('modal-table-body');
-            
-            headerTr.innerHTML = `
-                <th class="p-3 font-semibold">วันที่</th>
+                <th class="p-3 font-semibold">ชื่อบุคลากร</th>
                 <th class="p-3 font-semibold">เครื่องจักร</th>
                 <th class="p-3 font-semibold">กะ</th>
                 <th class="p-3 font-semibold text-center">PDR</th>
-                <th class="p-3 font-semibold">Description</th>
-                <th class="p-3 font-semibold text-center">จำนวนหยุดเครื่อง</th>
                 <th class="p-3 font-semibold text-right">จำนวนผลิต</th>
                 <th class="p-3 font-semibold text-right">ของเสียแผ่น</th>
                 <th class="p-3 font-semibold text-right">น้ำหนักของเสีย (kg)</th>
@@ -1829,24 +1436,20 @@
             `;
             tbody.innerHTML = '';
 
-            let pRows = currentFilteredNCP.filter(r => r.ncpName === personName);
-            let targetRows = [];
-
-            if (type === 'over2') {
-                targetRows = pRows.filter(r => r.ncpOver > 2);
-            } else if (type === 'excess50') {
-                targetRows = pRows.filter(r => r.ncpAK > 50 || (parseFloat(r.ncpLoss) > 0 && parseFloat(r.ncpOutput) > 0 && (parseFloat(r.ncpLoss) / parseFloat(r.ncpOutput)) > 0.5));
-            } else if (type === 'normal') {
-                targetRows = pRows.filter(r => r.ncpOver <= 2);
-            } else {
-                targetRows = pRows;
+            let targetRows = currentFilteredNCP.filter(r => r.ncpName === personName);
+            if (filterType === 'over2') {
+                targetRows = targetRows.filter(r => r.ncpOver > 2);
+            } else if (filterType === 'excess50') {
+                targetRows = targetRows.filter(r => r.ncpAK > 50 || (parseFloat(r.ncpLoss) > 0 && parseFloat(r.ncpOutput) > 0 && (parseFloat(r.ncpLoss) / parseFloat(r.ncpOutput)) > 0.5));
+            } else if (filterType === 'normal') {
+                targetRows = targetRows.filter(r => r.ncpOver <= 2);
             }
 
-            titleEl.textContent = `รายละเอียดข้อมูลของ: ${personName}`;
+            titleEl.textContent = `รายละเอียด NCP ของบุคลากร: ${personName} (${filterType === 'over2' ? 'เกิน 2 พาเลท' : filterType === 'excess50' ? 'ของเสีย > 50%' : filterType === 'normal' ? 'ปกติ' : 'ทั้งหมด'})`;
             subtitleEl.textContent = `พบรายการทั้งหมด ${targetRows.length} รายการ`;
 
             if (targetRows.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="11" class="p-6 text-center text-slate-400">ไม่พบรายการข้อมูล</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="10" class="p-6 text-center text-slate-400">ไม่พบรายการข้อมูล</td></tr>`;
             } else {
                 targetRows.forEach(r => {
                     let outVal = parseFloat(r.ncpOutput) || 0;
@@ -1856,14 +1459,13 @@
                     tr.className = 'hover:bg-slate-50 transition-colors';
                     tr.innerHTML = `
                         <td class="p-3 text-slate-700">${formatDateToDisplay(r.ncpDate)}</td>
+                        <td class="p-3 font-medium text-slate-800">${r.ncpName || '-'}</td>
                         <td class="p-3 text-slate-700">${r.ncpMachine || '-'}</td>
                         <td class="p-3 text-slate-700">${r.ncpShift || '-'}</td>
                         <td class="p-3 text-center text-indigo-700 font-semibold">${r.ncpPDR || '-'}</td>
-                        <td class="p-3 text-slate-700">${r.ncpDescE || '-'}</td>
-                        <td class="p-3 text-center text-slate-700 font-semibold">${r.ncpStopL || '-'}</td>
-                        <td class="p-3 text-right font-medium text-slate-800">${outVal > 0 ? outVal.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2}) : '-'}</td>
-                        <td class="p-3 text-right font-medium text-red-600">${lossVal > 0 ? lossVal.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2}) : '-'}</td>
-                        <td class="p-3 text-right font-medium text-amber-600">${weightYVal > 0 ? weightYVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '-'}</td>
+                        <td class="p-3 text-right font-medium text-slate-800">${outVal > 0 ? outVal.toLocaleString() : '-'}</td>
+                        <td class="p-3 text-right font-medium text-red-600">${lossVal > 0 ? lossVal.toLocaleString() : '-'}</td>
+                        <td class="p-3 text-right font-medium text-amber-600">${weightYVal > 0 ? weightYVal.toLocaleString(undefined, {minimumFractionDigits: 2}) : '-'}</td>
                         <td class="p-3 text-center font-bold ${r.ncpOver > 2 ? 'text-amber-600' : 'text-emerald-600'}">${r.ncpOver}</td>
                         <td class="p-3 text-slate-700">${r.ncpProblemU || '-'}</td>
                     `;
@@ -1874,15 +1476,171 @@
             modal.classList.remove('hidden');
         }
 
+        function openDetailByPersonAndTimeModal(personName, tLabel, viewType) {
+            const modal = document.getElementById('detail-modal');
+            const titleEl = document.getElementById('modal-title');
+            const subtitleEl = document.getElementById('modal-subtitle');
+            const headerTr = document.getElementById('modal-table-header');
+            const tbody = document.getElementById('modal-table-body');
+            
+            if (!headerTr || !tbody) return;
+
+            headerTr.innerHTML = `
+                <th class="p-3 font-semibold">วันที่</th>
+                <th class="p-3 font-semibold">ชื่อบุคลากร</th>
+                <th class="p-3 font-semibold">เครื่องจักร</th>
+                <th class="p-3 font-semibold">กะ</th>
+                <th class="p-3 font-semibold text-center">PDR</th>
+                <th class="p-3 font-semibold text-right">จำนวนผลิต</th>
+                <th class="p-3 font-semibold text-right">ของเสียแผ่น</th>
+                <th class="p-3 font-semibold text-right">น้ำหนักของเสีย (kg)</th>
+                <th class="p-3 font-semibold text-center">พาเลทเกิน</th>
+                <th class="p-3 font-semibold">ปัญหาที่พบ</th>
+            `;
+            tbody.innerHTML = '';
+
+            let targetRows = currentFilteredNCP.filter(r => r.ncpName === personName && getGroupKey(r.ncpDate, viewType) === tLabel);
+
+            titleEl.textContent = `รายละเอียด NCP ของบุคลากร: ${personName} (${tLabel})`;
+            subtitleEl.textContent = `พบรายการทั้งหมด ${targetRows.length} รายการ`;
+
+            if (targetRows.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" class="p-6 text-center text-slate-400">ไม่พบรายการข้อมูล</td></tr>`;
+            } else {
+                targetRows.forEach(r => {
+                    let outVal = parseFloat(r.ncpOutput) || 0;
+                    let lossVal = parseFloat(r.ncpLoss) || 0;
+                    let weightYVal = parseFloat(r.ncpWeightY) || 0;
+                    let tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50 transition-colors';
+                    tr.innerHTML = `
+                        <td class="p-3 text-slate-700">${formatDateToDisplay(r.ncpDate)}</td>
+                        <td class="p-3 font-medium text-slate-800">${r.ncpName || '-'}</td>
+                        <td class="p-3 text-slate-700">${r.ncpMachine || '-'}</td>
+                        <td class="p-3 text-slate-700">${r.ncpShift || '-'}</td>
+                        <td class="p-3 text-center text-indigo-700 font-semibold">${r.ncpPDR || '-'}</td>
+                        <td class="p-3 text-right font-medium text-slate-800">${outVal > 0 ? outVal.toLocaleString() : '-'}</td>
+                        <td class="p-3 text-right font-medium text-red-600">${lossVal > 0 ? lossVal.toLocaleString() : '-'}</td>
+                        <td class="p-3 text-right font-medium text-amber-600">${weightYVal > 0 ? weightYVal.toLocaleString(undefined, {minimumFractionDigits: 2}) : '-'}</td>
+                        <td class="p-3 text-center font-bold ${r.ncpOver > 2 ? 'text-amber-600' : 'text-emerald-600'}">${r.ncpOver}</td>
+                        <td class="p-3 text-slate-700">${r.ncpProblemU || '-'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function openDetailByProblemModal(probName, selectedPerson) {
+            const modal = document.getElementById('detail-modal');
+            const titleEl = document.getElementById('modal-title');
+            const subtitleEl = document.getElementById('modal-subtitle');
+            const headerTr = document.getElementById('modal-table-header');
+            const tbody = document.getElementById('modal-table-body');
+            
+            if (!headerTr || !tbody) return;
+
+            headerTr.innerHTML = `
+                <th class="p-3 font-semibold">วันที่</th>
+                <th class="p-3 font-semibold">ชื่อบุคลากร</th>
+                <th class="p-3 font-semibold">เครื่องจักร</th>
+                <th class="p-3 font-semibold">กะ</th>
+                <th class="p-3 font-semibold text-center">PDR</th>
+                <th class="p-3 font-semibold text-right">น้ำหนักของเสีย (kg)</th>
+                <th class="p-3 font-semibold">ปัญหาที่พบ</th>
+            `;
+            tbody.innerHTML = '';
+
+            let targetRows = currentFilteredNCP.filter(r => {
+                let prob = (r.ncpProblemU || '').trim();
+                if (prob !== probName) return false;
+                if (selectedPerson && r.ncpName !== selectedPerson) return false;
+                return true;
+            });
+
+            titleEl.textContent = `รายละเอียดปัญหาของเสีย: ${probName}${selectedPerson ? ' (' + selectedPerson + ')' : ''}`;
+            subtitleEl.textContent = `พบรายการทั้งหมด ${targetRows.length} รายการ`;
+
+            if (targetRows.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">ไม่พบรายการข้อมูล</td></tr>`;
+            } else {
+                targetRows.forEach(r => {
+                    let weightYVal = parseFloat(r.ncpWeightY) || 0;
+                    let tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50 transition-colors';
+                    tr.innerHTML = `
+                        <td class="p-3 text-slate-700">${formatDateToDisplay(r.ncpDate)}</td>
+                        <td class="p-3 font-medium text-slate-800">${r.ncpName || '-'}</td>
+                        <td class="p-3 text-slate-700">${r.ncpMachine || '-'}</td>
+                        <td class="p-3 text-slate-700">${r.ncpShift || '-'}</td>
+                        <td class="p-3 text-center text-indigo-700 font-semibold">${r.ncpPDR || '-'}</td>
+                        <td class="p-3 text-right font-medium text-amber-600">${weightYVal > 0 ? weightYVal.toLocaleString(undefined, {minimumFractionDigits: 2}) : '-'}</td>
+                        <td class="p-3 text-slate-700">${r.ncpProblemU || '-'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function openDetailBySingleRowModal(r) {
+            const modal = document.getElementById('detail-modal');
+            const titleEl = document.getElementById('modal-title');
+            const subtitleEl = document.getElementById('modal-subtitle');
+            const headerTr = document.getElementById('modal-table-header');
+            const tbody = document.getElementById('modal-table-body');
+            
+            if (!headerTr || !tbody) return;
+
+            headerTr.innerHTML = `
+                <th class="p-3 font-semibold">หัวข้อข้อมูล</th>
+                <th class="p-3 font-semibold">รายละเอียด</th>
+            `;
+            tbody.innerHTML = '';
+
+            titleEl.textContent = `รายละเอียดรายการ NCP (ของเสีย > 50%)`;
+            subtitleEl.textContent = `บุคลากร: ${r.ncpName || '-'} | วันที่: ${formatDateToDisplay(r.ncpDate)}`;
+
+            let details = [
+                { label: 'วันที่', val: formatDateToDisplay(r.ncpDate) },
+                { label: 'ชื่อบุคลากร', val: r.ncpName || '-' },
+                { label: 'เครื่องจักร', val: r.ncpMachine || '-' },
+                { label: 'กะการทำงาน', val: r.ncpShift || '-' },
+                { label: 'PDR', val: r.ncpPDR || '-' },
+                { label: 'Description', val: r.ncpDescE || '-' },
+                { label: 'จำนวนหยุดเครื่อง', val: r.ncpStopL || '-' },
+                { label: 'จำนวนผลิต', val: (parseFloat(r.ncpOutput) || 0).toLocaleString() },
+                { label: 'ของเสียแผ่น', val: (parseFloat(r.ncpLoss) || 0).toLocaleString() },
+                { label: 'น้ำหนักของเสีย', val: (parseFloat(r.ncpWeightY) || 0).toLocaleString(undefined, {minimumFractionDigits: 2}) + ' kg' },
+                { label: 'พาเลทเกิน', val: r.ncpOver },
+                { label: 'ปัญหาที่พบ', val: r.ncpProblemU || '-' }
+            ];
+
+            details.forEach(item => {
+                let tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition-colors';
+                tr.innerHTML = `
+                    <td class="p-3 font-medium text-slate-700 w-1/3">${item.label}</td>
+                    <td class="p-3 text-slate-800">${item.val}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            modal.classList.remove('hidden');
+        }
+
         function closeModal() {
-            document.getElementById('detail-modal').classList.add('hidden');
+            const modal = document.getElementById('detail-modal');
+            if (modal) modal.classList.add('hidden');
         }
 
         function filterWasteData() {
-            const startDate = document.getElementById('waste-start-date').value;
-            const endDate = document.getElementById('waste-end-date').value;
-            const machineVal = document.getElementById('waste-machine').value;
-            const shiftVal = document.getElementById('waste-shift').value;
+            const startDate = document.getElementById('waste-start-date') ? document.getElementById('waste-start-date').value : '';
+            const endDate = document.getElementById('waste-end-date') ? document.getElementById('waste-end-date').value : '';
+            const machineVal = document.getElementById('waste-machine') ? document.getElementById('waste-machine').value : '';
+            const shiftVal = document.getElementById('waste-shift') ? document.getElementById('waste-shift').value : '';
 
             currentFilteredWaste = parsedRowsWaste.filter(r => {
                 if (!r.wasteDate && !r.wasteMachine && r.weightE === 0 && r.weightF === 0) return false;
@@ -1900,10 +1658,14 @@
                 totalF += r.weightF;
             });
 
-            document.getElementById('waste-total-weight-e').textContent = totalE.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            document.getElementById('waste-total-weight-f').textContent = totalF.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            const tEEl = document.getElementById('waste-total-weight-e');
+            const tFEl = document.getElementById('waste-total-weight-f');
+            const avgEl = document.getElementById('waste-avg-percent');
+
+            if (tEEl) tEEl.textContent = totalE.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            if (tFEl) tFEl.textContent = totalF.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
             let avgPercent = totalF > 0 ? ((totalE / totalF) * 100).toFixed(2) : '0.00';
-            document.getElementById('waste-avg-percent').textContent = `${avgPercent}%`;
+            if (avgEl) avgEl.textContent = `${avgPercent}%`;
 
             renderWasteShiftChart(currentFilteredWaste);
             renderWasteShiftCards(currentFilteredWaste);
@@ -1911,9 +1673,11 @@
 
         function renderWasteShiftCards(data) {
             const container = document.getElementById('waste-shift-cards-container');
+            if (!container) return;
             container.innerHTML = '';
             let shifts = [...new Set(data.map(r => r.wasteShift).filter(Boolean))].sort();
-            document.getElementById('waste-shift-count').textContent = `${shifts.length} กะ`;
+            const countEl = document.getElementById('waste-shift-count');
+            if (countEl) countEl.textContent = `${shifts.length} กะ`;
 
             if (shifts.length === 0) {
                 container.innerHTML = `<div class="col-span-full bg-white rounded-2xl p-8 text-center border border-slate-200"><p class="text-slate-400 text-sm">ไม่พบข้อมูลตามเงื่อนไขที่เลือก</p></div>`;
@@ -1930,7 +1694,8 @@
                 let machineList = [...new Set(sRows.map(r => r.wasteMachine).filter(Boolean))].join(', ');
 
                 let card = document.createElement('div');
-                card.className = 'bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 hover:shadow-md transition-all flex flex-col justify-between';
+                card.className = 'bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 hover:shadow-md transition-all flex flex-col justify-between cursor-pointer';
+                card.onclick = () => openDetailByWasteShiftModal(shift);
                 card.innerHTML = `
                     <div>
                         <div class="flex justify-between items-start mb-3">
@@ -1964,8 +1729,106 @@
             });
         }
 
+        function openDetailByWasteShiftModal(shiftVal) {
+            const modal = document.getElementById('detail-modal');
+            const titleEl = document.getElementById('modal-title');
+            const subtitleEl = document.getElementById('modal-subtitle');
+            const headerTr = document.getElementById('modal-table-header');
+            const tbody = document.getElementById('modal-table-body');
+            
+            if (!headerTr || !tbody) return;
+
+            headerTr.innerHTML = `
+                <th class="p-3 font-semibold">วันที่</th>
+                <th class="p-3 font-semibold">Station</th>
+                <th class="p-3 font-semibold">กะ</th>
+                <th class="p-3 font-semibold">เครื่องจักร</th>
+                <th class="p-3 font-semibold text-right">น้ำหนักของเสีย (kg)</th>
+                <th class="p-3 font-semibold text-right">Consumption</th>
+                <th class="p-3 font-semibold text-right">% Waste</th>
+            `;
+            tbody.innerHTML = '';
+
+            let targetRows = currentFilteredWaste.filter(r => r.wasteShift === shiftVal);
+
+            titleEl.textContent = `รายละเอียด Waste กะ ${shiftVal}`;
+            subtitleEl.textContent = `พบรายการทั้งหมด ${targetRows.length} รายการ`;
+
+            if (targetRows.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">ไม่พบรายการข้อมูล</td></tr>`;
+            } else {
+                targetRows.forEach(r => {
+                    let pct = r.weightF > 0 ? ((r.weightE / r.weightF) * 100).toFixed(2) : '0.00';
+                    let tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50 transition-colors';
+                    tr.innerHTML = `
+                        <td class="p-3 text-slate-700">${formatDateToDisplay(r.wasteDate)}</td>
+                        <td class="p-3 text-slate-700">${r.wasteStation || '-'}</td>
+                        <td class="p-3 text-slate-700">${r.wasteShift || '-'}</td>
+                        <td class="p-3 text-slate-700">${r.wasteMachine || '-'}</td>
+                        <td class="p-3 text-right font-medium text-red-600">${r.weightE.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                        <td class="p-3 text-right font-medium text-indigo-600">${r.weightF.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                        <td class="p-3 text-right font-bold text-slate-800">${pct}%</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function openDetailByWasteTimeModal(tLabel, viewType) {
+            const modal = document.getElementById('detail-modal');
+            const titleEl = document.getElementById('modal-title');
+            const subtitleEl = document.getElementById('modal-subtitle');
+            const headerTr = document.getElementById('modal-table-header');
+            const tbody = document.getElementById('modal-table-body');
+            
+            if (!headerTr || !tbody) return;
+
+            headerTr.innerHTML = `
+                <th class="p-3 font-semibold">วันที่</th>
+                <th class="p-3 font-semibold">Station</th>
+                <th class="p-3 font-semibold">กะ</th>
+                <th class="p-3 font-semibold">เครื่องจักร</th>
+                <th class="p-3 font-semibold text-right">น้ำหนักของเสีย (kg)</th>
+                <th class="p-3 font-semibold text-right">Consumption</th>
+                <th class="p-3 font-semibold text-right">% Waste</th>
+            `;
+            tbody.innerHTML = '';
+
+            let targetRows = currentFilteredWaste.filter(r => getGroupKey(r.wasteDate, viewType) === tLabel);
+
+            titleEl.textContent = `รายละเอียด Waste ตามช่วงเวลา: ${tLabel}`;
+            subtitleEl.textContent = `พบรายการทั้งหมด ${targetRows.length} รายการ`;
+
+            if (targetRows.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">ไม่พบรายการข้อมูล</td></tr>`;
+            } else {
+                targetRows.forEach(r => {
+                    let pct = r.weightF > 0 ? ((r.weightE / r.weightF) * 100).toFixed(2) : '0.00';
+                    let tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50 transition-colors';
+                    tr.innerHTML = `
+                        <td class="p-3 text-slate-700">${formatDateToDisplay(r.wasteDate)}</td>
+                        <td class="p-3 text-slate-700">${r.wasteStation || '-'}</td>
+                        <td class="p-3 text-slate-700">${r.wasteShift || '-'}</td>
+                        <td class="p-3 text-slate-700">${r.wasteMachine || '-'}</td>
+                        <td class="p-3 text-right font-medium text-red-600">${r.weightE.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                        <td class="p-3 text-right font-medium text-indigo-600">${r.weightF.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                        <td class="p-3 text-right font-bold text-slate-800">${pct}%</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            modal.classList.remove('hidden');
+        }
+
         function renderWasteShiftChart(data) {
-            const ctx = document.getElementById('wasteShiftChart').getContext('2d');
+            const canvasEl = document.getElementById('wasteShiftChart');
+            if (!canvasEl) return;
+            const ctx = canvasEl.getContext('2d');
             let shifts = [...new Set(data.map(r => r.wasteShift).filter(Boolean))].sort();
             let timeLabels = [...new Set(data.map(r => getGroupKey(r.wasteDate, currentWasteView)).filter(Boolean))].sort();
 
@@ -2012,6 +1875,14 @@
                     scales: {
                         x: { grid: { display: false }, ticks: { font: { family: 'Prompt' } } },
                         y: { beginAtZero: true, ticks: { font: { family: 'Prompt' }, callback: function(value) { return value + '%'; } }, grid: { color: '#f1f5f9' } }
+                    },
+                    onClick: function(event, elements) {
+                        if (elements.length > 0) {
+                            let element = elements[0];
+                            let timeIndex = element.index;
+                            let tLabel = this.data.labels[timeIndex];
+                            openDetailByWasteTimeModal(tLabel, currentWasteView);
+                        }
                     }
                 },
                 plugins: [{
@@ -2038,96 +1909,634 @@
             });
         }
 
-        function updateSummaryTabContent() {
-            const ncpOverContainer = document.getElementById('summary-ncp-over-container');
-            ncpOverContainer.innerHTML = '';
-            
-            let persons = [...new Set(currentFilteredNCP.map(r => r.ncpName).filter(Boolean))];
-            let overTargetPersons = [];
+        function filterAdditionalData() {
+            const startDate = document.getElementById('add-start-date') ? document.getElementById('add-start-date').value : '';
+            const endDate = document.getElementById('add-end-date') ? document.getElementById('add-end-date').value : '';
+            const deptVal = document.getElementById('add-dept-filter') ? document.getElementById('add-dept-filter').value : '';
+            const machineVal = document.getElementById('add-machine-filter') ? document.getElementById('add-machine-filter').value : '';
+            const shiftVal = document.getElementById('add-shift-filter') ? document.getElementById('add-shift-filter').value : '';
 
-            persons.forEach(person => {
-                let pRows = currentFilteredNCP.filter(r => r.ncpName === person);
-                let overRows = pRows.filter(r => r.ncpOver > 2);
-                if (overRows.length > 0) {
-                    overTargetPersons.push({ person, total: pRows.length, over: overRows.length });
-                }
+            currentFilteredAdditional = parsedRowsAdditional.filter(r => {
+                if (!r.dateVal && !r.issueI && r.countS === 0) return false;
+                if (startDate && r.dateVal < startDate) return false;
+                if (endDate && r.dateVal > endDate) return false;
+                if (deptVal && r.deptK !== deptVal) return false;
+                if (machineVal && r.machineT !== machineVal) return false;
+                if (shiftVal && r.shiftP !== shiftVal) return false;
+                return true;
             });
 
-            overTargetPersons.sort((a, b) => b.over - a.over);
+            let totalLossMins = currentFilteredAdditional.reduce((sum, r) => sum + r.lossTimeL, 0);
+            let totalIssuesCount = currentFilteredAdditional.reduce((sum, r) => sum + r.countS, 0);
 
-            if (overTargetPersons.length === 0) {
-                ncpOverContainer.innerHTML = `<div class="col-span-full p-4 text-center text-slate-400 text-xs bg-white rounded-xl border border-slate-200">ไม่พบข้อมูลบุคลากรที่เกินเป้าหมายตามช่วงเวลาหรือตัวกรองปัจจุบัน</div>`;
+            const lossTimeEl = document.getElementById('add-total-loss-time');
+            const totalIssuesEl = document.getElementById('add-total-issues');
+
+            if (lossTimeEl) lossTimeEl.textContent = formatMinutesToHM(totalLossMins);
+            if (totalIssuesEl) totalIssuesEl.textContent = totalIssuesCount.toLocaleString();
+
+            renderAddTrendChart(currentFilteredAdditional);
+            renderAddDeptShiftBarChart(currentFilteredAdditional);
+            renderSupplierPieChart(currentFilteredAdditional);
+            renderGradeBarChart(currentFilteredAdditional);
+            renderAdditionalShiftCards(currentFilteredAdditional);
+        }
+
+        function renderAddTrendChart(data) {
+            const canvasEl = document.getElementById('addTrendChart');
+            if (!canvasEl) return;
+            const ctx = canvasEl.getContext('2d');
+            let timeLabels = [...new Set(data.map(r => getGroupKey(r.dateVal, currentAddView)).filter(Boolean))].sort();
+
+            let countsByTime = timeLabels.map(tLabel => {
+                let tRows = data.filter(r => getGroupKey(r.dateVal, currentAddView) === tLabel);
+                return tRows.reduce((sum, r) => sum + r.countS, 0);
+            });
+
+            if (addTrendChartInstance) addTrendChartInstance.destroy();
+            addTrendChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: timeLabels.length > 0 ? timeLabels : ['ไม่มีข้อมูล'],
+                    datasets: [{
+                        label: 'จำนวนครั้งปัญหาม้วน',
+                        data: countsByTime.length > 0 ? countsByTime : [0],
+                        borderColor: '#6366f1',
+                        backgroundColor: '#6366f1',
+                        borderWidth: 2.5,
+                        tension: 0.2,
+                        fill: false,
+                        pointRadius: 4,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: { family: 'Prompt' }, bodyFont: { family: 'Prompt' }, padding: 12 }
+                    },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { font: { family: 'Prompt' } } },
+                        y: { beginAtZero: true, ticks: { precision: 0, font: { family: 'Prompt' } }, grid: { color: '#f1f5f9' }, grace: '15%' }
+                    },
+                    onClick: function(event, elements) {
+                        if (elements.length > 0) {
+                            let element = elements[0];
+                            let timeIndex = element.index;
+                            let tLabel = this.data.labels[timeIndex];
+                            openDetailByTimeModal(tLabel, currentAddView);
+                        }
+                    }
+                },
+                plugins: [{
+                    id: 'customAddTrendDataLabels',
+                    afterDatasetsDraw(chart) {
+                        const { ctx } = chart;
+                        chart.data.datasets.forEach((dataset, datasetIndex) => {
+                            const meta = chart.getDatasetMeta(datasetIndex);
+                            if (!meta.hidden) {
+                                meta.data.forEach((element, index) => {
+                                    const value = dataset.data[index];
+                                    if (value !== undefined && value !== null && value > 0) {
+                                        ctx.fillStyle = '#6366f1';
+                                        ctx.font = 'bold 10px Prompt, sans-serif';
+                                        ctx.textAlign = 'center';
+                                        ctx.textBaseline = 'bottom';
+                                        ctx.fillText(Math.round(value), element.x, element.y - 6);
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }]
+            });
+        }
+
+        function renderAddDeptShiftBarChart(data) {
+            const canvasEl = document.getElementById('addDeptShiftBarChart');
+            if (!canvasEl) return;
+            const ctx = canvasEl.getContext('2d');
+            const stopFilter = document.getElementById('add-m-stop-filter') ? document.getElementById('add-m-stop-filter').value : 'all';
+
+            let filteredByStop = data.filter(r => {
+                let isStop = isStoppageRecord(r.stopU);
+                if (stopFilter === 'stop' && !isStop) return false;
+                if (stopFilter === 'nonstop' && isStop) return false;
+                return true;
+            });
+
+            let detailMMap = {};
+            filteredByStop.forEach(r => {
+                let mVal = r.detailM ? r.detailM.trim() : 'ไม่ระบุ M';
+                if (!mVal || mVal === '-' || mVal.toLowerCase() === 'nan') mVal = 'ไม่ระบุ M';
+                detailMMap[mVal] = (detailMMap[mVal] || 0) + r.countS;
+            });
+
+            let sortedM = Object.keys(detailMMap).map(m => ({
+                mName: m,
+                count: detailMMap[m]
+            })).sort((a, b) => b.count - a.count);
+
+            let labels = sortedM.map(item => item.mName);
+            let counts = sortedM.map(item => item.count);
+
+            if (addDeptShiftBarChartInstance) addDeptShiftBarChartInstance.destroy();
+            addDeptShiftBarChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels.length > 0 ? labels : ['ไม่มีข้อมูล'],
+                    datasets: [{
+                        label: 'จำนวนครั้ง',
+                        data: counts.length > 0 ? counts : [0],
+                        backgroundColor: '#6366f1',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: { family: 'Prompt' }, bodyFont: { family: 'Prompt' }, padding: 12 }
+                    },
+                    scales: {
+                        x: { 
+                            grid: { display: false }, 
+                            ticks: { 
+                                font: { family: 'Prompt', size: 10 },
+                                callback: function(value, index) {
+                                    let label = this.getLabelForValue(index);
+                                    return label.length > 20 ? label.substring(0, 20) + '...' : label;
+                                }
+                            } 
+                        },
+                        y: { beginAtZero: true, ticks: { precision: 0, font: { family: 'Prompt' } }, grid: { color: '#f1f5f9' }, grace: '15%' }
+                    },
+                    onClick: function(event, elements) {
+                        if (elements.length > 0) {
+                            let element = elements[0];
+                            let index = element.index;
+                            let mName = labels[index];
+                            openDetailByMModal(mName, stopFilter);
+                        }
+                    }
+                },
+                plugins: [{
+                    id: 'customMBarDataLabels',
+                    afterDatasetsDraw(chart) {
+                        const { ctx } = chart;
+                        chart.data.datasets.forEach((dataset, datasetIndex) => {
+                            const meta = chart.getDatasetMeta(datasetIndex);
+                            if (!meta.hidden) {
+                                meta.data.forEach((element, index) => {
+                                    const value = dataset.data[index];
+                                    if (value !== undefined && value !== null && value > 0) {
+                                        ctx.fillStyle = '#334155';
+                                        ctx.font = 'bold 10px Prompt, sans-serif';
+                                        ctx.textAlign = 'center';
+                                        ctx.textBaseline = 'bottom';
+                                        ctx.fillText(Math.round(value), element.x, element.y - 6);
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }]
+            });
+        }
+
+        function openDetailByMModal(mName, stopFilter) {
+            const modal = document.getElementById('detail-modal');
+            const titleEl = document.getElementById('modal-title');
+            const subtitleEl = document.getElementById('modal-subtitle');
+            const headerTr = document.getElementById('modal-table-header');
+            const tbody = document.getElementById('modal-table-body');
+            
+            if (!headerTr || !tbody) return;
+
+            headerTr.innerHTML = `
+                <th class="p-3 font-semibold">วันที่</th>
+                <th class="p-3 font-semibold">หน่วยงาน</th>
+                <th class="p-3 font-semibold">Supplier</th>
+                <th class="p-3 font-semibold">เกรดแกรม</th>
+                <th class="p-3 font-semibold">เครื่องจักร</th>
+                <th class="p-3 font-semibold">กะ</th>
+                <th class="p-3 font-semibold">ปัญหาที่พบ (ม้วน)</th>
+                <th class="p-3 font-semibold">รายละเอียด M</th>
+                <th class="p-3 font-semibold">สถานะการหยุดเครื่อง</th>
+                <th class="p-3 font-semibold text-right">เวลาสูญเสีย</th>
+                <th class="p-3 font-semibold text-right">จำนวนครั้ง</th>
+            `;
+            tbody.innerHTML = '';
+
+            let targetRows = currentFilteredAdditional.filter(r => {
+                let mVal = r.detailM ? r.detailM.trim() : 'ไม่ระบุ M';
+                if (!mVal || mVal === '-' || mVal.toLowerCase() === 'nan') mVal = 'ไม่ระบุ M';
+                if (mVal !== mName) return false;
+
+                let isStop = isStoppageRecord(r.stopU);
+                if (stopFilter === 'stop' && !isStop) return false;
+                if (stopFilter === 'nonstop' && isStop) return false;
+                return true;
+            });
+
+            titleEl.textContent = `รายละเอียดปัญหาม้วนตาม M: ${mName}`;
+            subtitleEl.textContent = `พบรายการทั้งหมด ${targetRows.length} รายการ`;
+
+            if (targetRows.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="11" class="p-6 text-center text-slate-400">ไม่พบรายการข้อมูล</td></tr>`;
             } else {
-                overTargetPersons.forEach(item => {
-                    let div = document.createElement('div');
-                    div.className = 'bg-white p-4 rounded-xl border border-red-200 shadow-sm flex flex-col justify-between';
-                    div.innerHTML = `
-                        <div>
-                            <div class="flex justify-between items-start mb-2">
-                                <span class="font-bold text-slate-800 text-sm">${item.person}</span>
-                                <span class="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-semibold">เกิน ${item.over} ครั้ง</span>
-                            </div>
-                            <p class="text-xs text-slate-500">จากทั้งหมด ${item.total} รายการผลิต</p>
-                        </div>
-                        <div class="mt-3 pt-2 border-t border-slate-100 flex justify-between text-xs">
-                            <span class="text-slate-400">อัตราความผิดพลาด</span>
-                            <span class="font-bold text-red-600">${((item.over / item.total) * 100).toFixed(1)}%</span>
-                        </div>
+                targetRows.forEach(r => {
+                    let isStop = isStoppageRecord(r.stopU);
+                    let stopLabel = isStop ? 'หยุดเครื่อง' : 'ไม่หยุดเครื่อง';
+
+                    let tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50 transition-colors';
+                    tr.innerHTML = `
+                        <td class="p-3 text-slate-700">${formatDateToDisplay(r.dateVal)}</td>
+                        <td class="p-3 text-slate-700">${r.deptK || '-'}</td>
+                        <td class="p-3 text-slate-700 font-medium text-indigo-900">${r.supplierD || '-'}</td>
+                        <td class="p-3 text-slate-700 font-medium text-indigo-700">${r.gradeE || '-'}</td>
+                        <td class="p-3 text-slate-700">${r.machineT || '-'}</td>
+                        <td class="p-3 text-slate-700">${r.shiftP || '-'}</td>
+                        <td class="p-3 font-medium text-slate-800">${r.issueI || '-'}</td>
+                        <td class="p-3 text-slate-700 font-medium text-indigo-600">${r.detailM || '-'}</td>
+                        <td class="p-3 text-slate-700"><span class="px-2 py-0.5 rounded-full text-xs font-semibold ${isStop ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}">${stopLabel}</span></td>
+                        <td class="p-3 text-right font-semibold text-amber-600">${r.lossTimeL > 0 ? formatMinutesToHM(r.lossTimeL) : '-'}</td>
+                        <td class="p-3 text-right font-bold text-indigo-600">${r.countS.toLocaleString()}</td>
                     `;
-                    ncpOverContainer.appendChild(div);
+                    tbody.appendChild(tr);
                 });
             }
 
-            const abnormalContainer = document.getElementById('summary-waste-abnormal-container');
-            const normalContainer = document.getElementById('summary-waste-normal-container');
-            abnormalContainer.innerHTML = '';
-            normalContainer.innerHTML = '';
+            modal.classList.remove('hidden');
+        }
 
-            let machines = [...new Set(currentFilteredWaste.map(r => r.wasteMachine).filter(Boolean))].sort();
-            let abnormalCount = 0;
-            let normalCount = 0;
+        function openDetailByTimeModal(tLabel, viewType) {
+            const modal = document.getElementById('detail-modal');
+            const titleEl = document.getElementById('modal-title');
+            const subtitleEl = document.getElementById('modal-subtitle');
+            const headerTr = document.getElementById('modal-table-header');
+            const tbody = document.getElementById('modal-table-body');
+            
+            if (!headerTr || !tbody) return;
 
-            machines.forEach(machine => {
-                let mRows = currentFilteredWaste.filter(r => r.wasteMachine === machine);
-                let shifts = [...new Set(mRows.map(r => r.wasteShift).filter(Boolean))].sort();
+            headerTr.innerHTML = `
+                <th class="p-3 font-semibold">วันที่</th>
+                <th class="p-3 font-semibold">หน่วยงาน</th>
+                <th class="p-3 font-semibold">Supplier</th>
+                <th class="p-3 font-semibold">เกรดแกรม</th>
+                <th class="p-3 font-semibold">เครื่องจักร</th>
+                <th class="p-3 font-semibold">กะ</th>
+                <th class="p-3 font-semibold">ปัญหาที่พบ (ม้วน)</th>
+                <th class="p-3 font-semibold">รายละเอียด M</th>
+                <th class="p-3 font-semibold text-right">จำนวนครั้ง</th>
+            `;
+            tbody.innerHTML = '';
 
-                shifts.forEach(shift => {
-                    let sRows = mRows.filter(r => r.wasteShift === shift);
-                    let e = sRows.reduce((sum, r) => sum + r.weightE, 0);
-                    let f = sRows.reduce((sum, r) => sum + r.weightF, 0);
-                    let pct = f > 0 ? (e / f) * 100 : 0;
-                    let isAbnormal = pct > 2.00;
+            let targetRows = currentFilteredAdditional.filter(r => getGroupKey(r.dateVal, viewType) === tLabel);
 
-                    let itemHtml = `
-                        <div class="bg-white p-3 rounded-xl border ${isAbnormal ? 'border-red-200' : 'border-emerald-200'} shadow-sm flex justify-between items-center text-xs">
-                            <div>
-                                <span class="font-bold text-slate-800">เครื่องจักร: ${machine}</span>
-                                <span class="text-slate-500 ml-2">กะ ${shift}</span>
-                            </div>
-                            <div class="text-right">
-                                <span class="font-bold ${isAbnormal ? 'text-red-600' : 'text-emerald-600'} text-sm">${pct.toFixed(2)}%</span>
-                            </div>
-                        </div>
+            titleEl.textContent = `รายละเอียดปัญหาม้วนตามช่วงเวลา: ${tLabel}`;
+            subtitleEl.textContent = `พบรายการทั้งหมด ${targetRows.length} รายการ`;
+
+            if (targetRows.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">ไม่พบรายการข้อมูล</td></tr>`;
+            } else {
+                targetRows.forEach(r => {
+                    let tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50 transition-colors';
+                    tr.innerHTML = `
+                        <td class="p-3 text-slate-700">${formatDateToDisplay(r.dateVal)}</td>
+                        <td class="p-3 text-slate-700">${r.deptK || '-'}</td>
+                        <td class="p-3 text-slate-700 font-medium text-indigo-900">${r.supplierD || '-'}</td>
+                        <td class="p-3 text-slate-700 font-medium text-indigo-700">${r.gradeE || '-'}</td>
+                        <td class="p-3 text-slate-700">${r.machineT || '-'}</td>
+                        <td class="p-3 text-slate-700">${r.shiftP || '-'}</td>
+                        <td class="p-3 font-medium text-slate-800">${r.issueI || '-'}</td>
+                        <td class="p-3 text-slate-700 font-medium text-indigo-600">${r.detailM || '-'}</td>
+                        <td class="p-3 text-right font-bold text-indigo-600">${r.countS.toLocaleString()}</td>
                     `;
-
-                    if (isAbnormal) {
-                        abnormalCount++;
-                        abnormalContainer.innerHTML += itemHtml;
-                    } else {
-                        normalCount++;
-                        normalContainer.innerHTML += itemHtml;
-                    }
+                    tbody.appendChild(tr);
                 });
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function openDetailBySupplierModal(supName) {
+            const modal = document.getElementById('detail-modal');
+            const titleEl = document.getElementById('modal-title');
+            const subtitleEl = document.getElementById('modal-subtitle');
+            const headerTr = document.getElementById('modal-table-header');
+            const tbody = document.getElementById('modal-table-body');
+            
+            if (!headerTr || !tbody) return;
+
+            headerTr.innerHTML = `
+                <th class="p-3 font-semibold">วันที่</th>
+                <th class="p-3 font-semibold">หน่วยงาน</th>
+                <th class="p-3 font-semibold">Supplier</th>
+                <th class="p-3 font-semibold">เกรดแกรม</th>
+                <th class="p-3 font-semibold">เครื่องจักร</th>
+                <th class="p-3 font-semibold">กะ</th>
+                <th class="p-3 font-semibold">ปัญหาที่พบ (ม้วน)</th>
+                <th class="p-3 font-semibold">รายละเอียด M</th>
+                <th class="p-3 font-semibold text-right">จำนวนครั้ง</th>
+            `;
+            tbody.innerHTML = '';
+
+            let targetRows = currentFilteredAdditional.filter(r => {
+                let sup = r.supplierD ? r.supplierD.trim() : 'ไม่ระบุ Supplier';
+                if (!sup || sup === '-' || sup.toLowerCase() === 'nan') sup = 'ไม่ระบุ Supplier';
+                return sup === supName;
             });
 
-            if (abnormalCount === 0) abnormalContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">ไม่มีกะที่ทำ Waste เกินเป้าหมายตามตัวกรองปัจจุบัน</p>`;
-            if (normalCount === 0) normalContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">ไม่มีกะที่ทำ Waste ได้ตามเป้าหมายตามตัวกรองปัจจุบัน</p>`;
+            titleEl.textContent = `รายละเอียดปัญหาม้วนตาม Supplier: ${supName}`;
+            subtitleEl.textContent = `พบรายการทั้งหมด ${targetRows.length} รายการ`;
 
-            const rollContainer = document.getElementById('summary-roll-issues-container');
-            rollContainer.innerHTML = '';
+            if (targetRows.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">ไม่พบรายการข้อมูล</td></tr>`;
+            } else {
+                targetRows.forEach(r => {
+                    let tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50 transition-colors';
+                    tr.innerHTML = `
+                        <td class="p-3 text-slate-700">${formatDateToDisplay(r.dateVal)}</td>
+                        <td class="p-3 text-slate-700">${r.deptK || '-'}</td>
+                        <td class="p-3 text-slate-700 font-medium text-indigo-900">${r.supplierD || '-'}</td>
+                        <td class="p-3 text-slate-700 font-medium text-indigo-700">${r.gradeE || '-'}</td>
+                        <td class="p-3 text-slate-700">${r.machineT || '-'}</td>
+                        <td class="p-3 text-slate-700">${r.shiftP || '-'}</td>
+                        <td class="p-3 font-medium text-slate-800">${r.issueI || '-'}</td>
+                        <td class="p-3 text-slate-700 font-medium text-indigo-600">${r.detailM || '-'}</td>
+                        <td class="p-3 text-right font-bold text-indigo-600">${r.countS.toLocaleString()}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function openDetailByGradeModal(gradeName) {
+            const modal = document.getElementById('detail-modal');
+            const titleEl = document.getElementById('modal-title');
+            const subtitleEl = document.getElementById('modal-subtitle');
+            const headerTr = document.getElementById('modal-table-header');
+            const tbody = document.getElementById('modal-table-body');
             
+            if (!headerTr || !tbody) return;
+
+            headerTr.innerHTML = `
+                <th class="p-3 font-semibold">วันที่</th>
+                <th class="p-3 font-semibold">หน่วยงาน</th>
+                <th class="p-3 font-semibold">Supplier</th>
+                <th class="p-3 font-semibold">เกรดแกรม</th>
+                <th class="p-3 font-semibold">เครื่องจักร</th>
+                <th class="p-3 font-semibold">กะ</th>
+                <th class="p-3 font-semibold">ปัญหาที่พบ (ม้วน)</th>
+                <th class="p-3 font-semibold">รายละเอียด M</th>
+                <th class="p-3 font-semibold text-right">จำนวนครั้ง</th>
+            `;
+            tbody.innerHTML = '';
+
+            let targetRows = currentFilteredAdditional.filter(r => {
+                let grade = r.gradeE ? r.gradeE.trim() : 'ไม่ระบุเกรด';
+                if (!grade || grade === '-' || grade.toLowerCase() === 'nan') grade = 'ไม่ระบุเกรด';
+                return grade === gradeName;
+            });
+
+            titleEl.textContent = `รายละเอียดปัญหาม้วนตามเกรดแกรม: ${gradeName}`;
+            subtitleEl.textContent = `พบรายการทั้งหมด ${targetRows.length} รายการ`;
+
+            if (targetRows.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">ไม่พบรายการข้อมูล</td></tr>`;
+            } else {
+                targetRows.forEach(r => {
+                    let tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50 transition-colors';
+                    tr.innerHTML = `
+                        <td class="p-3 text-slate-700">${formatDateToDisplay(r.dateVal)}</td>
+                        <td class="p-3 text-slate-700">${r.deptK || '-'}</td>
+                        <td class="p-3 text-slate-700 font-medium text-indigo-900">${r.supplierD || '-'}</td>
+                        <td class="p-3 text-slate-700 font-medium text-indigo-700">${r.gradeE || '-'}</td>
+                        <td class="p-3 text-slate-700">${r.machineT || '-'}</td>
+                        <td class="p-3 text-slate-700">${r.shiftP || '-'}</td>
+                        <td class="p-3 font-medium text-slate-800">${r.issueI || '-'}</td>
+                        <td class="p-3 text-slate-700 font-medium text-indigo-600">${r.detailM || '-'}</td>
+                        <td class="p-3 text-right font-bold text-indigo-600">${r.countS.toLocaleString()}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function openDetailByShiftDeptModal(shiftVal, deptVal, stoppageFilter = 'all') {
+            const modal = document.getElementById('detail-modal');
+            const titleEl = document.getElementById('modal-title');
+            const subtitleEl = document.getElementById('modal-subtitle');
+            const headerTr = document.getElementById('modal-table-header');
+            const tbody = document.getElementById('modal-table-body');
+            
+            if (!headerTr || !tbody) return;
+
+            headerTr.innerHTML = `
+                <th class="p-3 font-semibold">วันที่</th>
+                <th class="p-3 font-semibold">หน่วยงาน</th>
+                <th class="p-3 font-semibold">กะ</th>
+                <th class="p-3 font-semibold">Supplier</th>
+                <th class="p-3 font-semibold">เกรดแกรม</th>
+                <th class="p-3 font-semibold">ปัญหาที่พบ (ม้วน)</th>
+                <th class="p-3 font-semibold">รายละเอียด M</th>
+                <th class="p-3 font-semibold">สถานะการหยุดเครื่อง</th>
+                <th class="p-3 font-semibold text-right">เวลาสูญเสีย</th>
+                <th class="p-3 font-semibold text-right">จำนวนครั้ง</th>
+            `;
+            tbody.innerHTML = '';
+
+            let targetRows = currentFilteredAdditional.filter(r => {
+                let shift = r.shiftP ? r.shiftP.trim() : '';
+                let dept = r.deptK ? r.deptK.trim() : 'ไม่ระบุหน่วยงาน';
+                if (shift !== shiftVal || dept !== deptVal) return false;
+
+                let isStop = isStoppageRecord(r.stopU);
+                if (stoppageFilter === 'stop' && !isStop) return false;
+                if (stoppageFilter === 'nonstop' && isStop) return false;
+                return true;
+            });
+
+            let filterText = stoppageFilter === 'stop' ? ' (เฉพาะหยุดเครื่อง)' : stoppageFilter === 'nonstop' ? ' (เฉพาะไม่หยุดเครื่อง)' : '';
+            titleEl.textContent = `รายละเอียดปัญหาม้วน กะ ${shiftVal} | ${deptVal}${filterText}`;
+            subtitleEl.textContent = `พบรายการทั้งหมด ${targetRows.length} รายการ`;
+
+            if (targetRows.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" class="p-6 text-center text-slate-400">ไม่พบรายการข้อมูล</td></tr>`;
+            } else {
+                targetRows.forEach(r => {
+                    let isStop = isStoppageRecord(r.stopU);
+                    let stopLabel = isStop ? 'หยุดเครื่อง' : 'ไม่หยุดเครื่อง';
+                    let tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50 transition-colors';
+                    tr.innerHTML = `
+                        <td class="p-3 text-slate-700">${formatDateToDisplay(r.dateVal)}</td>
+                        <td class="p-3 text-slate-700">${r.deptK || '-'}</td>
+                        <td class="p-3 text-slate-700">${r.shiftP || '-'}</td>
+                        <td class="p-3 text-slate-700">${r.supplierD || '-'}</td>
+                        <td class="p-3 text-slate-700">${r.gradeE || '-'}</td>
+                        <td class="p-3 font-medium text-slate-800">${r.issueI || '-'}</td>
+                        <td class="p-3 text-slate-700 font-medium text-indigo-600">${r.detailM || '-'}</td>
+                        <td class="p-3"><span class="px-2 py-0.5 rounded-full text-xs font-semibold ${isStop ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}">${stopLabel}</span></td>
+                        <td class="p-3 text-right font-semibold text-amber-600">${r.lossTimeL > 0 ? formatMinutesToHM(r.lossTimeL) : '-'}</td>
+                        <td class="p-3 text-right font-bold text-indigo-600">${r.countS.toLocaleString()}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function renderSupplierPieChart(data) {
+            const canvasEl = document.getElementById('supplierPieChart');
+            if (!canvasEl) return;
+            const ctx = canvasEl.getContext('2d');
+
+            let supplierMap = {};
+            data.forEach(r => {
+                let sup = r.supplierD ? r.supplierD.trim() : 'ไม่ระบุ Supplier';
+                if (!sup || sup === '-' || sup.toLowerCase() === 'nan') sup = 'ไม่ระบุ Supplier';
+                supplierMap[sup] = (supplierMap[sup] || 0) + r.countS;
+            });
+
+            let sortedSuppliers = Object.keys(supplierMap).map(sup => ({
+                supplier: sup,
+                count: supplierMap[sup]
+            })).sort((a, b) => b.count - a.count);
+
+            let labels = sortedSuppliers.map(item => item.supplier);
+            let counts = sortedSuppliers.map(item => item.count);
+
+            const colorPalette = [
+                '#6366f1', '#ef4444', '#10b981', '#f59e0b', '#3b82f6', 
+                '#ec4899', '#8b5cf6', '#14b8a6', '#f97316', '#06b6d4'
+            ];
+
+            if (supplierPieChartInstance) supplierPieChartInstance.destroy();
+            supplierPieChartInstance = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels.length > 0 ? labels : ['ไม่มีข้อมูล'],
+                    datasets: [{
+                        data: counts.length > 0 ? counts : [0],
+                        backgroundColor: colorPalette
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { family: 'Prompt', size: 10 } } },
+                        tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: { family: 'Prompt' }, bodyFont: { family: 'Prompt' }, padding: 12 }
+                    },
+                    onClick: function(event, elements) {
+                        if (elements.length > 0) {
+                            let element = elements[0];
+                            let index = element.index;
+                            let supName = labels[index];
+                            openDetailBySupplierModal(supName);
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderGradeBarChart(data) {
+            const canvasEl = document.getElementById('gradeBarChart');
+            if (!canvasEl) return;
+            const ctx = canvasEl.getContext('2d');
+
+            let gradeMap = {};
+            data.forEach(r => {
+                let grade = r.gradeE ? r.gradeE.trim() : 'ไม่ระบุเกรด';
+                if (!grade || grade === '-' || grade.toLowerCase() === 'nan') grade = 'ไม่ระบุเกรด';
+                gradeMap[grade] = (gradeMap[grade] || 0) + r.countS;
+            });
+
+            let sortedGrades = Object.keys(gradeMap).map(g => ({
+                grade: g,
+                count: gradeMap[g]
+            })).sort((a, b) => b.count - a.count).slice(0, 10);
+
+            let labels = sortedGrades.map(item => item.grade);
+            let counts = sortedGrades.map(item => item.count);
+
+            if (gradeBarChartInstance) gradeBarChartInstance.destroy();
+            gradeBarChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels.length > 0 ? labels : ['ไม่มีข้อมูล'],
+                    datasets: [{
+                        label: 'จำนวนครั้ง',
+                        data: counts.length > 0 ? counts : [0],
+                        backgroundColor: '#10b981',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: { family: 'Prompt' }, bodyFont: { family: 'Prompt' }, padding: 12 }
+                    },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { font: { family: 'Prompt', size: 10 } } },
+                        y: { beginAtZero: true, ticks: { precision: 0, font: { family: 'Prompt' } }, grid: { color: '#f1f5f9' }, grace: '15%' }
+                    },
+                    onClick: function(event, elements) {
+                        if (elements.length > 0) {
+                            let element = elements[0];
+                            let index = element.index;
+                            let gradeName = labels[index];
+                            openDetailByGradeModal(gradeName);
+                        }
+                    }
+                },
+                plugins: [{
+                    id: 'customGradeBarDataLabels',
+                    afterDatasetsDraw(chart) {
+                        const { ctx } = chart;
+                        chart.data.datasets.forEach((dataset, datasetIndex) => {
+                            const meta = chart.getDatasetMeta(datasetIndex);
+                            if (!meta.hidden) {
+                                meta.data.forEach((element, index) => {
+                                    const value = dataset.data[index];
+                                    if (value !== undefined && value !== null && value > 0) {
+                                        ctx.fillStyle = '#334155';
+                                        ctx.font = 'bold 10px Prompt, sans-serif';
+                                        ctx.textAlign = 'center';
+                                        ctx.textBaseline = 'bottom';
+                                        ctx.fillText(Math.round(value), element.x, element.y - 6);
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }]
+            });
+        }
+
+        function renderAdditionalShiftCards(data) {
+            const container = document.getElementById('add-shift-cards-container');
+            if (!container) return;
+            container.innerHTML = '';
+
             let addGroups = {};
-            currentFilteredAdditional.forEach(r => {
+            data.forEach(r => {
                 let shift = r.shiftP ? r.shiftP.trim() : '';
                 let dept = r.deptK ? r.deptK.trim() : 'ไม่ระบุหน่วยงาน';
                 if (!shift || shift === 'ไม่ระบุ' || shift === '-' || shift.toLowerCase() === 'nan') return;
@@ -2145,123 +2554,54 @@
                 }
             });
 
-            let rollKeys = Object.keys(addGroups).sort();
-            if (rollKeys.length === 0) {
-                rollContainer.innerHTML = `<div class="col-span-full p-4 text-center text-slate-400 text-xs bg-white rounded-xl border border-slate-200">ไม่พบข้อมูลปัญหาม้วนตามช่วงเวลาหรือตัวกรองปัจจุบัน</div>`;
-            } else {
-                rollKeys.forEach(k => {
-                    let g = addGroups[k];
-                    let div = document.createElement('div');
-                    div.className = 'bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between';
-                    div.innerHTML = `
-                        <div>
-                            <div class="flex justify-between items-start mb-2">
-                                <span class="font-bold text-slate-800 text-sm">กะ ${g.shift} | หน่วยงาน ${g.dept}</span>
-                                <span class="text-xs bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full font-semibold">${g.total} ครั้ง</span>
+            let keys = Object.keys(addGroups).sort();
+            const countEl = document.getElementById('add-shift-count');
+            if (countEl) countEl.textContent = `${keys.length} กะ/หน่วยงาน`;
+
+            if (keys.length === 0) {
+                container.innerHTML = `<div class="col-span-full bg-white rounded-2xl p-8 text-center border border-slate-200"><p class="text-slate-400 text-sm">ไม่พบข้อมูลตามเงื่อนไขที่เลือก</p></div>`;
+                return;
+            }
+
+            keys.forEach(k => {
+                let g = addGroups[k];
+                let card = document.createElement('div');
+                card.className = 'bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 hover:shadow-md transition-all flex flex-col justify-between cursor-pointer';
+                card.onclick = () => openDetailByShiftDeptModal(g.shift, g.dept, 'all');
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                                    <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm font-semibold">กะ</span>
+                                    กะ ${g.shift} | ${g.dept}
+                                </h3>
                             </div>
-                            <div class="grid grid-cols-3 gap-2 mt-2 text-xs">
-                                <div class="bg-red-50 p-2 rounded-lg text-red-800">
-                                    <p class="font-semibold">หยุดเครื่อง</p>
-                                    <p class="font-bold text-sm">${g.stop} ครั้ง</p>
-                                </div>
-                                <div class="bg-emerald-50 p-2 rounded-lg text-emerald-800">
-                                    <p class="font-semibold">ไม่หยุดเครื่อง</p>
-                                    <p class="font-bold text-sm">${g.nonStop} ครั้ง</p>
-                                </div>
-                                <div class="bg-amber-50 p-2 rounded-lg text-amber-800">
-                                    <p class="font-semibold">เวลาสูญเสีย</p>
-                                    <p class="font-bold text-xs">${formatMinutesToHM(g.lossTime)}</p>
-                                </div>
+                            <span class="text-xs bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-semibold font-semibold">${g.total} ครั้ง</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-3 gap-2 mb-3 text-xs" onclick="event.stopPropagation()">
+                            <div onclick="openDetailByShiftDeptModal('${g.shift}', '${g.dept}', 'stop')" class="bg-red-50/70 border border-red-200 p-2.5 rounded-xl text-center cursor-pointer hover:bg-red-100 transition-all">
+                                <p class="text-[10px] font-semibold text-red-800">หยุดเครื่อง</p>
+                                <p class="text-sm font-bold text-red-700 mt-0.5">${g.stop}</p>
+                            </div>
+                            <div onclick="openDetailByShiftDeptModal('${g.shift}', '${g.dept}', 'nonstop')" class="bg-emerald-50/70 border border-emerald-200 p-2.5 rounded-xl text-center cursor-pointer hover:bg-emerald-100 transition-all">
+                                <p class="text-[10px] font-semibold text-emerald-800">ไม่หยุดเครื่อง</p>
+                                <p class="text-sm font-bold text-emerald-700 mt-0.5">${g.nonStop}</p>
+                            </div>
+                            <div onclick="openDetailByShiftDeptModal('${g.shift}', '${g.dept}', 'all')" class="bg-amber-50/70 border border-amber-200 p-2.5 rounded-xl text-center cursor-pointer hover:bg-amber-100 transition-all">
+                                <p class="text-[10px] font-semibold text-amber-800">เวลาสูญเสีย</p>
+                                <p class="text-xs font-bold text-amber-700 mt-0.5 truncate">${formatMinutesToHM(g.lossTime)}</p>
                             </div>
                         </div>
-                    `;
-                    rollContainer.appendChild(div);
-                });
-            }
-
-            updateAIInsights(overTargetPersons, abnormalCount, normalCount, currentFilteredAdditional);
-        }
-
-        function updateAIInsights(overTargetPersons, abnormalCount, normalCount, rollData) {
-            const strengthsList = document.getElementById('ai-strengths-list');
-            const improvementsList = document.getElementById('ai-improvements-list');
-            strengthsList.innerHTML = '';
-            improvementsList.innerHTML = '';
-
-            let strengths = [];
-            let improvements = [];
-
-            if (normalCount > 0) {
-                strengths.push(`จากข้อมูลปัจจุบัน มีกะและเครื่องจักรจำนวน ${normalCount} รายการที่สามารถควบคุมอัตรา Waste ได้อยู่ในเกณฑ์มาตรฐาน (≤ 2.00%)`);
-            } else {
-                strengths.push(`ระบบบันทึกและจัดเก็บข้อมูลจาก Google Sheets เชื่อมต่อแบบ Real-time พร้อมวิเคราะห์ข้อมูลล่าสุด`);
-            }
-
-            let totalNCPPersons = [...new Set(currentFilteredNCP.map(r => r.ncpName).filter(Boolean))].length;
-            let compliantPersons = totalNCPPersons - overTargetPersons.length;
-            if (totalNCPPersons > 0) {
-                strengths.push(`บุคลากรในรอบนี้ (${compliantPersons} จาก ${totalNCPPersons} คน) ควบคุมพาเลทอยู่ในเกณฑ์มาตรฐาน ไม่เกิน 2 พาเลทบ่อยครั้ง`);
-            } else {
-                strengths.push(`ไม่พบรายการ NCP รายบุคคลในช่วงเวลาที่เลือก`);
-            }
-
-            let totalRollIssues = rollData.reduce((sum, r) => sum + r.countS, 0);
-            let stopRollIssues = rollData.filter(r => isStoppageRecord(r.stopU)).reduce((sum, r) => sum + r.countS, 0);
-            let totalLossTime = rollData.reduce((sum, r) => sum + r.lossTimeL, 0);
-            if (totalRollIssues > 0) {
-                let nonStopRatio = (((totalRollIssues - stopRollIssues) / totalRollIssues) * 100).toFixed(1);
-                strengths.push(`สถิติม้วนวัตถุดิบมีสัดส่วนการแก้ไขแบบไม่หยุดเครื่องสูงถึง ${nonStopRatio}% ซึ่งช่วยลดผลกระทบต่อเวลาเดินเครื่องรวม`);
-            }
-
-            if (overTargetPersons.length > 0) {
-                improvements.push(`พบพนักงานจำนวน ${overTargetPersons.length} ท่านที่เกิดพาเลทเกิน 2 พาเลทในตัวกรองนี้ ควรเน้นย้ำมาตรฐานการตรวจสอบหน้างาน`);
-            } else {
-                improvements.push(`รักษาสถิติความผิดพลาดรายบุคคลเป็นศูนย์อย่างต่อเนื่อง`);
-            }
-
-            if (abnormalCount > 0) {
-                improvements.push(`พบเครื่องจักรและกะการทำงาน ${abnormalCount} รายการที่เปอร์เซ็นต์ Waste เกิน 2.00% ควรตรวจสอบการป้อนแผ่นและอุณหภูมิเครื่องด่วน`);
-            } else {
-                improvements.push(`ภาพรวม Waste ทุกกะผ่านเกณฑ์มาตรฐานทั้งหมด สามารถพิจารณายกระดับเป้าหมายให้เข้มงวดขึ้นได้`);
-            }
-
-            if (stopRollIssues > 0) {
-                improvements.push(`มีเหตุการณ์ปัญหาม้วนจนต้อง "หยุดเครื่อง" รวม ${stopRollIssues} ครั้ง (เวลาสูญเสียรวม ${formatMinutesToHM(totalLossTime)}) ควรตรวจสอบคุณภาพม้วนและประสานงาน Supplier ล่วงหน้า`);
-            }
-
-            strengths.forEach(s => {
-                let li = document.createElement('li');
-                li.textContent = s;
-                strengthsList.appendChild(li);
+                    </div>
+                    <div class="pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+                        <span class="text-slate-400">คลิกการ์ดเพื่อดูรายละเอียด</span>
+                        <span class="font-semibold text-indigo-600 hover:underline">ดูรายการ →</span>
+                    </div>
+                `;
+                container.appendChild(card);
             });
-
-            improvements.forEach(i => {
-                let li = document.createElement('li');
-                li.textContent = i;
-                improvementsList.appendChild(li);
-            });
-        }
-
-        function exportWasteExcel() {
-            if (currentFilteredWaste.length === 0) return;
-            let exportData = currentFilteredWaste.map(r => ({
-                'วันที่': formatDateToDisplay(r.wasteDate),
-                'Station': r.wasteStation,
-                'กะ': r.wasteShift,
-                'เครื่องจักร': r.wasteMachine,
-                'น้ำหนักของเสีย': r.weightE,
-                'Consumption': r.weightF,
-                '%': r.weightF > 0 ? Number(((r.weightE / r.weightF) * 100).toFixed(2)) : 0
-            }));
-
-            let worksheet = XLSX.utils.json_to_sheet(exportData);
-            let workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Waste Analysis");
-            XLSX.writeFile(workbook, `Waste_Analysis_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
-        }
-
-        function exportSummaryReport() {
-            alert('ระบบกำลังดาวน์โหลดรายงานสรุปและแนวทางการแก้ไขปัญหาตามข้อมูลล่าสุด');
         }
 
         window.onload = loadAllData;
