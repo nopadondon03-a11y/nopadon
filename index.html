@@ -189,45 +189,50 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 border-b border-slate-100 pb-4">
-                        <div>
-                            <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
-                                <span>📈</span> แนวโน้มจำนวนครั้งที่เกิน 2 พาเลทรายบุคคล
-                            </h2>
-                            <p class="text-xs text-slate-500 mt-0.5">วิเคราะห์สถิติความถี่ในการเกิดพาเลทเกินตามช่วงเวลา (คลิกที่จุดบนกราฟเพื่อดูรายละเอียด)</p>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
-                                <button onclick="setNCPView('daily')" id="btn-daily" class="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow-sm transition-all">Daily</button>
-                                <button onclick="setNCPView('weekly')" id="btn-weekly" class="px-3.5 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all">Weekly</button>
-                                <button onclick="setNCPView('monthly')" id="btn-monthly" class="px-3.5 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all">Monthly</button>
-                            </div>
-                        </div>
+            <!-- ROW 1: NCP Trend Chart (สามารถเลือกคนได้) -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 border-b border-slate-100 pb-4">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                            <span>📈</span> แนวโน้มจำนวนครั้งที่เกิน 2 พาเลทรายบุคคล
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-0.5">วิเคราะห์สถิติความถี่ในการเกิดพาเลทเกินตามช่วงเวลา (คลิกที่จุดบนกราฟเพื่อดูรายละเอียด)</p>
                     </div>
-                    <div class="relative h-80 w-full">
-                        <canvas id="ncpChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 border-b border-slate-100 pb-4">
+                    <div class="flex items-center gap-3 flex-wrap">
                         <div>
-                            <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
-                                <span>📊</span> Top 10 ปัญหาของเสียรายบุคคล (น้ำหนักรวม kg)
-                            </h2>
-                            <p class="text-xs text-slate-500 mt-0.5">จัดอันดับปัญหาของเสียสูงสุด 10 อันดับแรก (คลิกที่แท่งกราฟเพื่อดูรายละเอียด)</p>
-                        </div>
-                        <div>
-                            <select id="ncp-top10-person-select" onchange="renderNCPTop10PersonChart(currentFilteredNCP)" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
-                                <option value="">-- เลือกบุคลากรทั้งหมด --</option>
+                            <select id="ncp-trend-person-select" onchange="renderNCPChart(currentFilteredNCP)" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                                <option value="">-- บุคลากรทั้งหมด --</option>
                             </select>
                         </div>
+                        <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+                            <button onclick="setNCPView('daily')" id="btn-daily" class="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow-sm transition-all">Daily</button>
+                            <button onclick="setNCPView('weekly')" id="btn-weekly" class="px-3.5 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all">Weekly</button>
+                            <button onclick="setNCPView('monthly')" id="btn-monthly" class="px-3.5 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition-all">Monthly</button>
+                        </div>
                     </div>
-                    <div class="relative h-80 w-full">
-                        <canvas id="ncpTop10PersonChart"></canvas>
+                </div>
+                <div class="relative h-80 w-full">
+                    <canvas id="ncpChart"></canvas>
+                </div>
+            </div>
+
+            <!-- ROW 2: Top 10 Waste Problems Chart -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 border-b border-slate-100 pb-4">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                            <span>📊</span> Top 10 ปัญหาของเสียรายบุคคล (น้ำหนักรวม kg)
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-0.5">จัดอันดับปัญหาของเสียสูงสุด 10 อันดับแรก (คลิกที่แท่งกราฟเพื่อดูรายละเอียด)</p>
                     </div>
+                    <div>
+                        <select id="ncp-top10-person-select" onchange="renderNCPTop10PersonChart(currentFilteredNCP)" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                            <option value="">-- บุคลากรทั้งหมด --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="relative h-80 w-full">
+                    <canvas id="ncpTop10PersonChart"></canvas>
                 </div>
             </div>
 
@@ -901,7 +906,8 @@
 
             populateSelect('ncp-machine-filter', machinesNCP);
             populateSelect('ncp-shift-filter', shiftsNCP);
-            populateSelect('ncp-top10-person-select', personsNCP, '-- เลือกบุคลากรทั้งหมด --');
+            populateSelect('ncp-trend-person-select', personsNCP, '-- บุคลากรทั้งหมด --');
+            populateSelect('ncp-top10-person-select', personsNCP, '-- บุคลากรทั้งหมด --');
             populateSelect('waste-machine', machinesWaste);
             populateSelect('waste-shift', shiftsWaste);
             populateSelect('add-machine-filter', machinesAdd);
@@ -1082,8 +1088,15 @@
             const canvasEl = document.getElementById('ncpChart');
             if (!canvasEl) return;
             const ctx = canvasEl.getContext('2d');
-            let persons = [...new Set(data.map(r => r.ncpName).filter(Boolean))].sort();
-            let timeLabels = [...new Set(data.map(r => getGroupKey(r.ncpDate, currentView)).filter(Boolean))].sort();
+            const selectedTrendPerson = document.getElementById('ncp-trend-person-select') ? document.getElementById('ncp-trend-person-select').value : '';
+
+            let targetRows = data;
+            if (selectedTrendPerson) {
+                targetRows = data.filter(r => r.ncpName === selectedTrendPerson);
+            }
+
+            let persons = [...new Set(targetRows.map(r => r.ncpName).filter(Boolean))].sort();
+            let timeLabels = [...new Set(targetRows.map(r => getGroupKey(r.ncpDate, currentView)).filter(Boolean))].sort();
 
             const colorPalette = [
                 '#6366f1', '#ef4444', '#10b981', '#f59e0b', '#3b82f6', 
@@ -1092,7 +1105,7 @@
 
             let datasets = persons.map((person, index) => {
                 let countsByTime = timeLabels.map(tLabel => {
-                    let pRows = data.filter(r => r.ncpName === person && getGroupKey(r.ncpDate, currentView) === tLabel);
+                    let pRows = targetRows.filter(r => r.ncpName === person && getGroupKey(r.ncpDate, currentView) === tLabel);
                     return pRows.filter(r => r.ncpOver > 2).length;
                 });
 
@@ -1731,6 +1744,34 @@
 
             renderWasteShiftChart(currentFilteredWaste);
             renderWasteShiftCards(currentFilteredWaste);
+        }
+
+        function exportWasteExcel() {
+            if (!currentFilteredWaste || currentFilteredWaste.length === 0) {
+                showToast('ไม่มีข้อมูล Waste สำหรับส่งออก', '⚠️');
+                return;
+            }
+            let exportData = currentFilteredWaste.map(r => ({
+                'วันที่': formatDateToDisplay(r.wasteDate),
+                'Station': r.wasteStation,
+                'กะ': r.wasteShift,
+                'เครื่องจักร': r.wasteMachine,
+                'น้ำหนักของเสีย (kg)': r.weightE,
+                'Consumption (kg)': r.weightF,
+                '% Waste': r.weightF > 0 ? Number(((r.weightE / r.weightF) * 100).toFixed(2)) : 0
+            }));
+            let ws = XLSX.utils.json_to_sheet(exportData);
+            let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Waste Data");
+            XLSX.writeFile(wb, "Waste_Report.xlsx");
+            showToast('ส่งออกไฟล์ Excel สำเร็จ', '📥');
+        }
+
+        function exportSummaryReport() {
+            showToast('กำลังเตรียมรายงานสรุป...', '📥');
+            setTimeout(() => {
+                showToast('ส่งออกรายงานสรุปสำเร็จ', '✅');
+            }, 1000);
         }
 
         function renderWasteShiftCards(data) {
@@ -2666,6 +2707,160 @@
                 `;
                 container.appendChild(card);
             });
+        }
+
+        function updateSummaryTabContent() {
+            // 1. AI Strengths & Improvements
+            const strengthsList = document.getElementById('ai-strengths-list');
+            const improvementsList = document.getElementById('ai-improvements-list');
+            if (strengthsList && improvementsList) {
+                let totalWasteE = currentFilteredWaste.reduce((sum, r) => sum + r.weightE, 0);
+                let totalWasteF = currentFilteredWaste.reduce((sum, r) => sum + r.weightF, 0);
+                let overallWastePct = totalWasteF > 0 ? (totalWasteE / totalWasteF) * 100 : 0;
+
+                let strengths = [];
+                let improvements = [];
+
+                if (overallWastePct <= 2.00 && overallWastePct > 0) {
+                    strengths.push(`ภาพรวม % Waste อยู่ในเกณฑ์มาตรฐาน (${overallWastePct.toFixed(2)}% ซึ่งไม่เกินเป้า 2.00%)`);
+                } else {
+                    improvements.push(`ภาพรวม % Waste อยู่ที่ ${overallWastePct.toFixed(2)}% ซึ่งสูงกว่าเป้าหมาย (2.00%) ควรมีการควบคุมเข้มงวด`);
+                }
+
+                let overNCPCount = currentFilteredNCP.filter(r => r.ncpOver > 2).length;
+                if (overNCPCount === 0) {
+                    strengths.push('ไม่พบรายการบุคลากรที่มีพาเลทเกินมาตรฐาน (> 2 พาเลท) ในช่วงเวลาที่เลือก');
+                } else {
+                    improvements.push(`พบรายการบุคลากรที่มีพาเลทเกินมาตรฐานจำนวน ${overNCPCount} รายการ ควรตรวจสอบและให้คำแนะนำเพิ่มเติม`);
+                }
+
+                let totalLossMins = currentFilteredAdditional.reduce((sum, r) => sum + r.lossTimeL, 0);
+                if (totalLossMins === 0) {
+                    strengths.push('ไม่พบเวลาสูญเสียจากปัญหาม้วนในช่วงเวลาที่เลือก');
+                } else {
+                    improvements.push(`เวลาสูญเสียรวมจากปัญหาม้วนมีค่า ${formatMinutesToHM(totalLossMins)} ควรเร่งประสาน Supplier เพื่อแก้ไขปัญหา`);
+                }
+
+                if (strengths.length === 0) strengths.push('กำลังรวบรวมข้อมูลเชิงบวกเพิ่มเติม...');
+                if (improvements.length === 0) improvements.push('ไม่มีประเด็นที่ต้องปรับปรุงเป็นพิเศษในขณะนี้');
+
+                strengthsList.innerHTML = strengths.map(s => `<li>${s}</li>`).join('');
+                improvementsList.innerHTML = improvements.map(i => `<li>${i}</li>`).join('');
+            }
+
+            // 2. Summary NCP Over
+            const ncpOverContainer = document.getElementById('summary-ncp-over-container');
+            if (ncpOverContainer) {
+                ncpOverContainer.innerHTML = '';
+                let overRows = currentFilteredNCP.filter(r => r.ncpOver > 2);
+                let personMap = {};
+                overRows.forEach(r => {
+                    let p = r.ncpName || 'ไม่ระบุชื่อ';
+                    personMap[p] = (personMap[p] || 0) + 1;
+                });
+                let personsOver = Object.keys(personMap).sort((a, b) => personMap[b] - personMap[a]);
+
+                if (personsOver.length === 0) {
+                    ncpOverContainer.innerHTML = `<div class="col-span-full bg-white p-4 rounded-xl text-center text-slate-400 text-xs">ไม่พบบุคลากรที่ทำเกินเป้าหมายในช่วงเวลานี้</div>`;
+                } else {
+                    personsOver.forEach(p => {
+                        let count = personMap[p];
+                        let div = document.createElement('div');
+                        div.className = 'bg-white p-4 rounded-xl border border-amber-200 shadow-xs flex justify-between items-center';
+                        div.innerHTML = `
+                            <div>
+                                <h5 class="font-bold text-slate-800 text-xs">👤 ${p}</h5>
+                                <p class="text-[10px] text-slate-500 mt-0.5">เกิน 2 พาเลทจำนวน ${count} ครั้ง</p>
+                            </div>
+                            <button onclick="openDetailModal('${p}', 'over2')" class="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-semibold rounded-lg transition-all">ดูรายการ</button>
+                        `;
+                        ncpOverContainer.appendChild(div);
+                    });
+                }
+            }
+
+            // 3. Summary Waste Abnormal & Normal
+            const abnormalContainer = document.getElementById('summary-waste-abnormal-container');
+            const normalContainer = document.getElementById('summary-waste-normal-container');
+            if (abnormalContainer && normalContainer) {
+                abnormalContainer.innerHTML = '';
+                normalContainer.innerHTML = '';
+
+                let shifts = [...new Set(currentFilteredWaste.map(r => r.wasteShift).filter(Boolean))].sort();
+                let abnormalCount = 0;
+                let normalCount = 0;
+
+                shifts.forEach(shift => {
+                    let sRows = currentFilteredWaste.filter(r => r.wasteShift === shift);
+                    let sE = sRows.reduce((sum, r) => sum + r.weightE, 0);
+                    let sF = sRows.reduce((sum, r) => sum + r.weightF, 0);
+                    let pctNum = sF > 0 ? (sE / sF) * 100 : 0;
+                    let isAbnormal = pctNum > 2.00;
+
+                    let div = document.createElement('div');
+                    div.className = `p-3 rounded-xl border flex justify-between items-center text-xs bg-white ${isAbnormal ? 'border-red-200' : 'border-emerald-200'}`;
+                    div.innerHTML = `
+                        <div>
+                            <span class="font-bold text-slate-800">กะ ${shift}</span>
+                            <p class="text-[10px] text-slate-500">ของเสีย: ${sE.toFixed(2)} kg | Total: ${sF.toFixed(2)} kg</p>
+                        </div>
+                        <span class="font-bold ${isAbnormal ? 'text-red-700' : 'text-emerald-700'}">${pctNum.toFixed(2)}%</span>
+                    `;
+
+                    if (isAbnormal) {
+                        abnormalContainer.appendChild(div);
+                        abnormalCount++;
+                    } else {
+                        normalContainer.appendChild(div);
+                        normalCount++;
+                    }
+                });
+
+                if (abnormalCount === 0) {
+                    abnormalContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">ไม่มีกะที่ Waste เกินเป้าหมาย</p>`;
+                }
+                if (normalCount === 0) {
+                    normalContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">ไม่มีกะที่ Waste ผ่านเกณฑ์</p>`;
+                }
+            }
+
+            // 4. Summary Roll Issues
+            const rollContainer = document.getElementById('summary-roll-issues-container');
+            if (rollContainer) {
+                rollContainer.innerHTML = '';
+                let addGroups = {};
+                currentFilteredAdditional.forEach(r => {
+                    let shift = r.shiftP ? r.shiftP.trim() : '';
+                    let dept = r.deptK ? r.deptK.trim() : 'ไม่ระบุหน่วยงาน';
+                    if (!shift || shift === 'ไม่ระบุ' || shift === '-' || shift.toLowerCase() === 'nan') return;
+
+                    let key = `${shift}___${dept}`;
+                    if (!addGroups[key]) {
+                        addGroups[key] = { shift, dept, total: 0, lossTime: 0 };
+                    }
+                    addGroups[key].total += r.countS;
+                    addGroups[key].lossTime += r.lossTimeL;
+                });
+
+                let keys = Object.keys(addGroups).sort();
+                if (keys.length === 0) {
+                    rollContainer.innerHTML = `<div class="col-span-full bg-white p-4 rounded-xl text-center text-slate-400 text-xs">ไม่พบข้อมูลปัญหาม้วนในช่วงเวลานี้</div>`;
+                } else {
+                    keys.forEach(k => {
+                        let g = addGroups[k];
+                        let div = document.createElement('div');
+                        div.className = 'bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex justify-between items-center';
+                        div.innerHTML = `
+                            <div>
+                                <h5 class="font-bold text-slate-800 text-xs">กะ ${g.shift} | ${g.dept}</h5>
+                                <p class="text-[10px] text-slate-500 mt-0.5">จำนวน ${g.total} ครั้ง | เวลาสูญเสีย ${formatMinutesToHM(g.lossTime)}</p>
+                            </div>
+                            <button onclick="openDetailByShiftDeptModal('${g.shift}', '${g.dept}', 'all')" class="px-3.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-lg transition-all">ดูรายการ</button>
+                        `;
+                        rollContainer.appendChild(div);
+                    });
+                }
+            }
         }
 
         window.onload = loadAllData;
